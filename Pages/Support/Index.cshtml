@@ -1,0 +1,256 @@
+@page "/support"
+@model TippSendApp.Pages.Support.IndexModel
+@{
+    ViewData["Title"] = "Support — How can we help?";
+}
+
+@section Styles {
+<style>
+body { background: var(--gs-cream); }
+
+/* ── Hero with illustrated hills ── */
+.support-hero {
+    position: relative;
+    overflow: hidden;
+    background: #071410;
+    padding: 0;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+.hills-illustration {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+.hills-illustration img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center center;
+}
+.support-hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 20px 72px;
+}
+
+/* Search bar */
+.support-search {
+    display: flex;
+    max-width: 520px;
+    margin: 0 auto;
+    background: white;
+    border-radius: var(--r-pill);
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+.support-search input {
+    flex: 1; border: none; outline: none;
+    padding: 15px 22px;
+    font-size: 15px; font-family: var(--sans);
+    background: transparent;
+}
+.support-search button {
+    background: var(--gs-gold); color: var(--gs-bog-deep);
+    border: none; padding: 15px 24px;
+    font-weight: 700; font-size: 18px; cursor: pointer;
+    transition: background 0.15s;
+}
+.support-search button:hover { background: var(--gs-gold-deep); color: white; }
+
+/* Category cards */
+.cat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: -40px;
+    position: relative;
+    z-index: 2;
+}
+@@media (max-width: 900px) { .cat-grid { grid-template-columns: 1fr 1fr; } }
+@@media (max-width: 460px) { .cat-grid { grid-template-columns: 1fr; } }
+
+.cat-card {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    padding: 28px 24px;
+    box-shadow: var(--shadow-2);
+    transition: transform 0.2s var(--ease-spring), box-shadow 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+.cat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-3); }
+.cat-card__icon { font-size: 32px; margin-bottom: 14px; display: block; }
+.cat-card__title { font-size: 15px; font-weight: 600; color: var(--gs-bog-deep); margin-bottom: 10px; }
+.cat-card__links { list-style: none; padding: 0; margin: 0; }
+.cat-card__links li {
+    font-size: 13px; color: var(--gs-stone);
+    padding: 4px 0; line-height: 1.4;
+    border-bottom: 1px solid var(--gs-mist);
+}
+.cat-card__links li:last-child { border-bottom: none; }
+.cat-card__links li:hover { color: var(--gs-bog-deep); }
+
+/* Contact section */
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+@@media (max-width: 768px) { .contact-grid { grid-template-columns: 1fr; } }
+
+.contact-card {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    padding: 32px 28px;
+    text-align: center;
+    transition: transform 0.2s var(--ease-spring), box-shadow 0.2s;
+}
+.contact-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); }
+.contact-card__icon { font-size: 30px; margin-bottom: 14px; }
+.contact-card__title { font-size: 16px; font-weight: 600; color: var(--gs-bog-deep); margin-bottom: 8px; }
+.contact-card__val { font-size: 14px; color: var(--gs-gold-deep); font-weight: 500; margin-bottom: 6px; }
+.contact-card__note { font-size: 12px; color: var(--gs-stone); }
+</style>
+}
+
+<!-- ═══ HERO with illustrated hills ════════════════════════════════ -->
+<section class="support-hero">
+    <!-- TippSend illustrated hills landscape -->
+    <div class="hills-illustration" aria-hidden="true">
+        <img src="/images/hills-illustration.jpg" alt="TippSend van on scenic rolling green hills illustration">
+    </div>
+
+    <!-- Hero text -->
+    <div class="support-hero-content" data-anim>
+        <div class="eyebrow mb-3" style="color:var(--gs-gold-soft);display:inline-block">Help Centre</div>
+        <h1 style="font-family:var(--display);font-weight:400;font-size:clamp(32px,5vw,58px);letter-spacing:-0.03em;color:white;margin:0 0 12px;line-height:1.05">
+            How can we help you?
+        </h1>
+        <p style="color:var(--gs-fog);margin-bottom:36px;font-size:16px;max-width:480px;margin-left:auto;margin-right:auto">
+            Browse by topic below or get in touch — we're a small local team and we'll get back to you fast.
+        </p>
+    </div>
+</section>
+
+<!-- ═══ CATEGORY CARDS ════════════════════════════════════════════ -->
+<section style="padding:0 0 72px;background:var(--gs-cream)">
+    <div class="container-xl">
+        <div class="cat-grid" data-anim style="--anim-delay:0.08s">
+            <a href="mailto:hello@tippsend.ie" class="cat-card">
+                <span class="cat-card__icon">🚚</span>
+                <div class="cat-card__title">Shipping & Delivery</div>
+                <ul class="cat-card__links">
+                    <li>Track my order</li>
+                    <li>Delivery areas</li>
+                    <li>Estimated times</li>
+                    <li>Proof of delivery</li>
+                </ul>
+            </a>
+            <a href="mailto:hello@tippsend.ie" class="cat-card">
+                <span class="cat-card__icon">↩️</span>
+                <div class="cat-card__title">Returns & Refunds</div>
+                <ul class="cat-card__links">
+                    <li>Return policy</li>
+                    <li>How to return</li>
+                    <li>Refund process</li>
+                    <li>Damaged items</li>
+                </ul>
+            </a>
+            <a href="mailto:hello@tippsend.ie" class="cat-card">
+                <span class="cat-card__icon">📦</span>
+                <div class="cat-card__title">Orders & Booking</div>
+                <ul class="cat-card__links">
+                    <li>Change or cancel order</li>
+                    <li>Booking issues</li>
+                    <li>Order history</li>
+                    <li>Gift messages</li>
+                </ul>
+            </a>
+            <a href="mailto:hello@tippsend.ie" class="cat-card">
+                <span class="cat-card__icon">💳</span>
+                <div class="cat-card__title">Payments & Billing</div>
+                <ul class="cat-card__links">
+                    <li>Accepted methods</li>
+                    <li>Billing issues</li>
+                    <li>Invoices & receipts</li>
+                    <li>Pricing explained</li>
+                </ul>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ POPULAR ARTICLES ═════════════════════════════════════════ -->
+<section style="background:var(--gs-paper);padding:72px 0;border-top:1px solid var(--gs-mist);border-bottom:1px solid var(--gs-mist)">
+    <div class="container-xl">
+        <div class="eyebrow mb-2" data-anim>Popular articles</div>
+        <h2 class="mb-4" data-anim style="--anim-delay:0.06s;font-weight:400;letter-spacing:-0.02em;color:var(--gs-bog-deep)">
+            Quick answers
+        </h2>
+        <div class="row g-3" data-anim style="--anim-delay:0.12s">
+            @foreach (var article in new[] {
+                ("How do I track my order?", "Enter your order reference on the Track page or use the link in your confirmation email."),
+                ("What areas do you deliver to?", "We cover Clonmel and South Tipperary's main towns — Cahir, Fethard, Carrick-on-Suir, Cashel, Ardfinnan, Newcastle, Clogheen, Killenaule and Mullinahone."),
+                ("Can I cancel or change my order?", "Contact us at hello@tippsend.ie within 2 hours of booking. We'll do our best to accommodate changes."),
+                ("How does Gift & Deliver work?", "You choose the shop and item, we collect it and deliver at your chosen time with a handwritten card."),
+                ("How is delivery pricing set?", "Pricing is based on area. Clonmel: €6. Mid Tipperary (Cahir, Fethard, Carrick, Kilsheelan, Ardfinnan, Newcastle): €10. Outer Tipperary (Cashel, Clogheen, Killenaule, Mullinahone): €14. Different areas: €12."),
+                ("Do you deliver on weekends?", "Yes — we deliver Monday to Sunday. Sunday deliveries incur a +€5 surcharge.")
+            })
+            {
+                <div class="col-md-6 col-lg-4">
+                    <a href="mailto:hello@tippsend.ie" style="display:block;padding:18px 20px;background:white;border:1.5px solid var(--gs-mist);border-radius:var(--r-md);text-decoration:none;transition:border-color 0.15s,transform 0.15s var(--ease-spring)"
+                       onmouseover="this.style.borderColor='var(--gs-gold)';this.style.transform='translateY(-2px)'"
+                       onmouseout="this.style.borderColor='var(--gs-mist)';this.style.transform=''">
+                        <div style="font-size:14px;font-weight:600;color:var(--gs-bog-deep);margin-bottom:6px">@article.Item1</div>
+                        <div style="font-size:13px;color:var(--gs-stone);line-height:1.5">@article.Item2</div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ═══ CONTACT US ════════════════════════════════════════════════ -->
+<section style="background:var(--gs-cream);padding:80px 0">
+    <div class="container-xl">
+        <div class="eyebrow mb-2 text-center" data-anim>Get in touch</div>
+        <h2 class="text-center mb-2" data-anim style="--anim-delay:0.06s;font-weight:400;letter-spacing:-0.02em;color:var(--gs-bog-deep)">
+            Still need help?
+        </h2>
+        <p class="text-center mb-5" data-anim style="--anim-delay:0.1s;color:var(--gs-stone);max-width:400px;margin-left:auto;margin-right:auto;font-size:15px">
+            Our team is based in Clonmel — real people, not bots.
+        </p>
+        <div class="contact-grid" data-anim style="--anim-delay:0.14s">
+            <a href="https://wa.me/353899258702?text=Hi%2C%20I%20need%20some%20help%20with%20my%20TippSend%20order." target="_blank" rel="noopener" class="contact-card" style="text-decoration:none">
+                <div class="contact-card__icon">💬</div>
+                <div class="contact-card__title">WhatsApp Us</div>
+                <div class="contact-card__val" style="color:#25D366">Message us on WhatsApp</div>
+                <div class="contact-card__note">Mon–Sun · 9am–6pm · Fastest response</div>
+            </a>
+            <div class="contact-card">
+                <div class="contact-card__icon">✉️</div>
+                <div class="contact-card__title">Email Us</div>
+                <div class="contact-card__val">
+                    <a href="mailto:hello@tippsend.ie" style="color:var(--gs-gold-deep);text-decoration:none">hello@tippsend.ie</a>
+                </div>
+                <div class="contact-card__note">Typical reply within 24 hours</div>
+            </div>
+            <div class="contact-card">
+                <div class="contact-card__icon">📍</div>
+                <div class="contact-card__title">Local Service</div>
+                <div class="contact-card__val">South Tipperary, Ireland</div>
+                <div class="contact-card__note">Serving Clonmel and South Tipperary's main towns</div>
+            </div>
+        </div>
+    </div>
+</section>

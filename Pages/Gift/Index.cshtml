@@ -1,0 +1,497 @@
+@page "/gift"
+@model IndexModel
+@{
+    ViewData["Title"] = "Gift & Deliver — Curated Local Gifts from South Tipperary";
+}
+
+@section Styles {
+<style>
+body { background: var(--gs-cream); }
+
+/* ── Gift layout ── */
+.gift-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    min-height: calc(100vh - 68px);
+    align-items: start;
+}
+@@media (max-width: 1024px) { .gift-layout { grid-template-columns: 240px 1fr; } }
+@@media (max-width: 768px)  { .gift-layout { grid-template-columns: 1fr; } }
+
+/* ── Sidebar ── */
+.gift-sidebar {
+    background: var(--gs-bog-deep);
+    min-height: calc(100vh - 68px);
+    padding: 48px 32px;
+    position: sticky;
+    top: 68px;
+    overflow-y: auto;
+}
+@@media (max-width: 768px) { .gift-sidebar { position: static; min-height: auto; padding: 36px 24px; } }
+
+.gift-sidebar__eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--gs-gold-soft); margin-bottom: 16px;
+}
+.gift-sidebar__heading {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(22px, 2.5vw, 30px);
+    line-height: 1.18; letter-spacing: -0.02em;
+    color: var(--gs-cream); margin-bottom: 16px;
+}
+.gift-sidebar__heading em { font-style: italic; color: var(--gs-gold); }
+.gift-sidebar__sub {
+    font-size: 13px; color: var(--gs-fog);
+    line-height: 1.6; margin-bottom: 36px;
+}
+
+.gift-sidebar__section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--gs-gold-soft);
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.gift-cat-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: var(--r-sm);
+    font-size: 14px; font-weight: 500;
+    color: var(--gs-fog); text-decoration: none;
+    margin-bottom: 2px;
+    transition: background 0.15s, color 0.15s;
+    cursor: pointer;
+}
+.gift-cat-link:hover { background: rgba(255,255,255,0.06); color: var(--gs-cream); }
+.gift-cat-link.active { background: rgba(201,162,75,0.15); color: var(--gs-gold); font-weight: 600; }
+.gift-cat-link__icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.gift-cat-link__count {
+    margin-left: auto; font-size: 11px; font-family: var(--mono);
+    background: rgba(255,255,255,0.08); padding: 2px 7px;
+    border-radius: var(--r-pill); color: var(--gs-fog);
+}
+
+.gift-sidebar__cta {
+    margin-top: 36px; padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+.gift-sidebar__info-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 14px;
+}
+.gift-sidebar__info-item span:first-child { font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+.gift-sidebar__info-item p {
+    font-size: 12px; color: var(--gs-fog); line-height: 1.5; margin: 0;
+}
+
+/* ── Main content ── */
+.gift-main { padding: 48px 40px; background: var(--gs-cream); }
+@@media (max-width: 1024px) { .gift-main { padding: 36px 24px; } }
+@@media (max-width: 768px)  { .gift-main { padding: 28px 20px; } }
+
+.gift-main-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 32px; flex-wrap: wrap; gap: 16px;
+}
+.gift-main-header h1 {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(28px, 3vw, 40px); letter-spacing: -0.02em;
+    color: var(--gs-bog-deep); margin: 0;
+}
+
+/* Filter tabs */
+.gift-filters {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px;
+}
+.filter-tab {
+    padding: 8px 18px; border-radius: var(--r-pill);
+    font-size: 13px; font-weight: 600;
+    border: 1.5px solid var(--gs-mist);
+    background: white; color: var(--gs-stone);
+    cursor: pointer; transition: all 0.15s; text-decoration: none;
+}
+.filter-tab:hover { border-color: var(--gs-gold); color: var(--gs-bog-deep); }
+.filter-tab.active {
+    background: var(--gs-bog-deep); color: var(--gs-cream);
+    border-color: var(--gs-bog-deep);
+}
+
+/* Product grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+@@media (max-width: 1200px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+@@media (max-width: 540px)  { .product-grid { grid-template-columns: 1fr; } }
+
+.product-card {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    transition: transform 0.2s var(--ease-spring), box-shadow 0.2s;
+}
+.product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-2); }
+
+.product-card__img {
+    height: 180px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 52px;
+    position: relative;
+    overflow: hidden;
+}
+.product-card__badge {
+    position: absolute; top: 12px; left: 12px;
+    background: #2d6a4f; color: white;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 4px 10px;
+    border-radius: var(--r-pill);
+}
+.product-card__body { padding: 18px 20px 20px; }
+.product-card__shop { font-size: 11px; color: var(--gs-stone); margin-bottom: 5px; }
+.product-card__name {
+    font-size: 15px; font-weight: 600; color: var(--gs-bog-deep);
+    margin-bottom: 8px; line-height: 1.3;
+}
+.product-card__price {
+    font-family: var(--mono); font-size: 18px; font-weight: 600;
+    color: var(--gs-bog-deep); margin-bottom: 14px;
+}
+.product-card__price span { font-size: 13px; color: var(--gs-stone); font-family: var(--sans); font-weight: 400; }
+
+.btn-add-cart {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 10px 16px;
+    background: var(--gs-bog-deep); color: var(--gs-cream);
+    border: none; border-radius: var(--r-sm);
+    font-size: 14px; font-weight: 600;
+    text-decoration: none; cursor: pointer;
+    transition: background 0.15s, transform 0.15s var(--ease-spring);
+}
+.btn-add-cart:hover { background: var(--gs-bog); transform: scale(1.02); color: var(--gs-cream); }
+
+/* ── How it works strip ── */
+.hiw-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 56px;
+    padding-top: 40px;
+    border-top: 1px solid var(--gs-mist);
+}
+@@media (max-width: 900px) { .hiw-strip { grid-template-columns: 1fr 1fr; } }
+@@media (max-width: 480px) { .hiw-strip { grid-template-columns: 1fr; } }
+.hiw-strip-item { text-align: center; }
+.hiw-strip-item__icon { font-size: 28px; margin-bottom: 10px; }
+.hiw-strip-item__title { font-size: 14px; font-weight: 600; color: var(--gs-bog-deep); margin-bottom: 4px; }
+.hiw-strip-item__desc { font-size: 12px; color: var(--gs-stone); line-height: 1.5; }
+</style>
+}
+
+@{
+    var products = new[] {
+        // ── Flowers ──────────────────────────────────────────────────
+        new { Name = "Seasonal Wildflower Bouquet",       Shop = "Blooming Thing Floristry, Clonmel",   Price = "€45", Delivery = "€6",  Img = "/images/product-bouquet.jpg",         IsNew = true,  Cat = "Flowers",      Occasions = "Birthday,Anniversary,Thank You" },
+        new { Name = "Anniversary Red Roses (12 Stems)",  Shop = "Blooming Thing Floristry, Clonmel",   Price = "€55", Delivery = "€6",  Img = "/images/product-roses.jpg",            IsNew = false, Cat = "Flowers",      Occasions = "Anniversary" },
+        new { Name = "Sympathy White Lily Arrangement",   Shop = "Blooming Thing Floristry, Clonmel",   Price = "€48", Delivery = "€6",  Img = "/images/product-sympathy-flowers.jpg", IsNew = false, Cat = "Flowers",      Occasions = "Sympathy" },
+        new { Name = "Thank You Sunflower Bouquet",       Shop = "Blooming Thing Floristry, Clonmel",   Price = "€38", Delivery = "€6",  Img = "/images/product-sunflowers.jpg",       IsNew = false, Cat = "Flowers",      Occasions = "Thank You,Congratulations" },
+        // ── Food & Drink ─────────────────────────────────────────────
+        new { Name = "Craft Gin & Tonic Gift Set",        Shop = "Lonergan's Off Licence, Clonmel",     Price = "€65", Delivery = "€6",  Img = "/images/product-gin.jpg",              IsNew = false, Cat = "Food & Drink", Occasions = "Birthday,Thank You" },
+        new { Name = "Champagne & Chocolates",            Shop = "Lonergan's Off Licence, Clonmel",     Price = "€58", Delivery = "€6",  Img = "/images/product-champagne.jpg",        IsNew = true,  Cat = "Food & Drink", Occasions = "Anniversary,Congratulations" },
+        new { Name = "Birthday Celebration Cake",         Shop = "Hickeys Bakery, Clonmel",             Price = "€45", Delivery = "€6",  Img = "/images/product-cake.jpg",             IsNew = true,  Cat = "Food & Drink", Occasions = "Birthday" },
+        new { Name = "Artisan Cheese & Chutney Board",    Shop = "Tipperary Artisan Market, Clonmel",   Price = "€42", Delivery = "€6",  Img = "/images/product-cheese.jpg",           IsNew = false, Cat = "Food & Drink", Occasions = "Thank You,Birthday" },
+        new { Name = "Gourmet Irish Chocolate Selection", Shop = "Cashel Heritage Deli, Cashel",        Price = "€35", Delivery = "€10", Img = "/images/product-chocolate.jpg",        IsNew = false, Cat = "Food & Drink", Occasions = "Birthday,Thank You,Sympathy" },
+        new { Name = "Tipperary Honey & Preserves Set",   Shop = "Golden Vale Butchers, Clonmel",       Price = "€30", Delivery = "€6",  Img = "/images/product-honey.jpg",            IsNew = false, Cat = "Food & Drink", Occasions = "Thank You,New Baby" },
+        // ── Gifts ────────────────────────────────────────────────────
+        new { Name = "Hand-Thrown Ceramic Mug",           Shop = "Craftworks Clonmel",                  Price = "€28", Delivery = "€6",  Img = "/images/product-mug.jpg",              IsNew = true,  Cat = "Gifts",        Occasions = "Birthday,Thank You" },
+        new { Name = "Luxury Scented Soy Candle",         Shop = "The Spa Room, Clonmel",               Price = "€38", Delivery = "€6",  Img = "/images/product-candle.jpg",           IsNew = false, Cat = "Gifts",        Occasions = "Birthday,Anniversary,Thank You" },
+        new { Name = "Rock of Cashel Limited Print",      Shop = "Cashel Arts, Cashel",                 Price = "€55", Delivery = "€10", Img = "/images/product-cashel-print.jpg",     IsNew = false, Cat = "Gifts",        Occasions = "Anniversary,Birthday" },
+        new { Name = "Lavender & Rose Bath Salts",        Shop = "The Spa Room, Clonmel",               Price = "€22", Delivery = "€6",  Img = "/images/product-bath-salts.jpg",       IsNew = false, Cat = "Gifts",        Occasions = "Birthday,Anniversary,Sympathy" },
+        new { Name = "Children's Story Book Set",         Shop = "Cashel Heritage Books, Cashel",       Price = "€32", Delivery = "€10", Img = "/images/product-books.jpg",            IsNew = true,  Cat = "Gifts",        Occasions = "New Baby,Birthday" },
+        new { Name = "Potted Plant & Card",               Shop = "Cahir Crafts & Gifts, Cahir",         Price = "€35", Delivery = "€10", Img = "/images/product-plant.jpg",            IsNew = false, Cat = "Gifts",        Occasions = "Sympathy,New Baby,Anniversary" },
+        new { Name = "Personalised Keepsake Box",         Shop = "Cahir Crafts & Gifts, Cahir",         Price = "€48", Delivery = "€10", Img = "/images/product-keepsake.jpg",         IsNew = false, Cat = "Gifts",        Occasions = "Birthday,Anniversary" },
+        new { Name = "Celebration Balloon Bouquet",       Shop = "Blooming Thing Floristry, Clonmel",   Price = "€25", Delivery = "€6",  Img = "/images/product-balloons.jpg",         IsNew = false, Cat = "Gifts",        Occasions = "Birthday,Congratulations,New Baby" },
+        // ── Hampers ──────────────────────────────────────────────────
+        new { Name = "New Baby Gift Hamper",              Shop = "Blooming Thing Floristry, Clonmel",   Price = "€65", Delivery = "€6",  Img = "/images/product-baby-hamper.jpg",      IsNew = true,  Cat = "Hampers",      Occasions = "New Baby" },
+        new { Name = "Heritage Wool Blanket",             Shop = "Cahir Crafts & Gifts, Cahir",         Price = "€75", Delivery = "€10", Img = "/images/product-blanket.jpg",          IsNew = false, Cat = "Hampers",      Occasions = "New Baby,Sympathy,Anniversary" },
+        new { Name = "Get Well Soon Hamper",              Shop = "Clonmel Pharmacy, Clonmel",           Price = "€45", Delivery = "€6",  Img = "/images/product-get-well.jpg",         IsNew = false, Cat = "Hampers",      Occasions = "Sympathy" },
+        new { Name = "Gourmet Food Hamper",               Shop = "Carrick Delicatessen, Carrick-on-Suir", Price = "€80", Delivery = "€10", Img = "/images/product-food-hamper.jpg",   IsNew = true,  Cat = "Hampers",      Occasions = "Birthday,Congratulations,Thank You" },
+    };
+}
+
+<div class="gift-layout">
+
+    <!-- ── Left sidebar ── -->
+    <aside class="gift-sidebar">
+        <div class="gift-sidebar__eyebrow" data-anim>Gift & Deliver</div>
+        <h2 class="gift-sidebar__heading" data-anim style="--anim-delay:0.06s">
+            Curated Local Gifts<br>from <em>South Tipperary</em>
+        </h2>
+        <p class="gift-sidebar__sub" data-anim style="--anim-delay:0.1s">
+            Real gifts from real Tipperary shops — sourced fresh the morning of delivery, with a handwritten card included.
+        </p>
+
+        <div class="gift-sidebar__section-label">Browse by category</div>
+        <button class="gift-cat-link active" data-cat="all" data-anim style="--anim-delay:0.12s;background:none;border:none;text-align:left;width:100%;cursor:pointer">
+            <span class="gift-cat-link__icon">✨</span>
+            All Gifts
+            <span class="gift-cat-link__count">22</span>
+        </button>
+        <button class="gift-cat-link" data-cat="Flowers" data-anim style="--anim-delay:0.14s;background:none;border:none;text-align:left;width:100%;cursor:pointer">
+            <span class="gift-cat-link__icon">🌹</span>
+            Flowers
+            <span class="gift-cat-link__count">4</span>
+        </button>
+        <button class="gift-cat-link" data-cat="Food &amp; Drink" data-anim style="--anim-delay:0.16s;background:none;border:none;text-align:left;width:100%;cursor:pointer">
+            <span class="gift-cat-link__icon">🍞</span>
+            Food &amp; Drink
+            <span class="gift-cat-link__count">6</span>
+        </button>
+        <button class="gift-cat-link" data-cat="Gifts" data-anim style="--anim-delay:0.18s;background:none;border:none;text-align:left;width:100%;cursor:pointer">
+            <span class="gift-cat-link__icon">🎁</span>
+            Gifts
+            <span class="gift-cat-link__count">8</span>
+        </button>
+        <button class="gift-cat-link" data-cat="Hampers" data-anim style="--anim-delay:0.2s;background:none;border:none;text-align:left;width:100%;cursor:pointer">
+            <span class="gift-cat-link__icon">🧺</span>
+            Hampers
+            <span class="gift-cat-link__count">4</span>
+        </button>
+
+        <div class="gift-sidebar__cta" data-anim style="--anim-delay:0.22s">
+            <div class="gift-sidebar__info-item d-none d-lg-flex">
+                <span>📸</span>
+                <p>Doorstep photo sent to you the moment it arrives</p>
+            </div>
+            <div class="gift-sidebar__info-item d-none d-lg-flex">
+                <span>✉️</span>
+                <p>Handwritten card included with every order</p>
+            </div>
+            <div class="gift-sidebar__info-item d-none d-lg-flex">
+                <span>⏱</span>
+                <p>Exact Moment delivery — within 5 minutes of your chosen time</p>
+            </div>
+            <!-- Schedule date picker -->
+            <div class="d-none d-lg-block mt-3 mb-2">
+                <label style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gs-gold-soft);display:block;margin-bottom:6px">
+                    Delivery date
+                </label>
+                <input type="date" id="giftDate"
+                       min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")"
+                       value="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")"
+                       class="form-control form-control-sm"
+                       style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--gs-cream);font-size:13px" />
+            </div>
+            <a id="giftBookBtn" href="/Book/Step1?preselectedDate=@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")"
+               class="btn btn-gold w-100 mt-1 d-none d-lg-flex" style="justify-content:center">
+                Send a gift →
+            </a>
+            <a href="https://wa.me/353899258702?text=Hi%2C%20I%27d%20like%20to%20order%20a%20gift%20delivery." target="_blank" rel="noopener"
+               class="d-none d-lg-flex w-100 mt-2 align-items-center justify-content-center gap-2"
+               style="background:#25D366;color:#fff;font-size:13px;font-weight:600;border-radius:var(--r-sm);padding:10px 16px;text-decoration:none">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                Order via WhatsApp
+            </a>
+        </div>
+    </aside>
+
+    <!-- ── Main product area ── -->
+    <main class="gift-main">
+        <div class="gift-main-header" data-anim>
+            <div>
+                <div class="eyebrow mb-1">Our collection</div>
+                <h1>Local gifts, delivered today</h1>
+            </div>
+            <div style="font-size:13px;color:var(--gs-stone)">
+                <span id="productCount" style="font-family:var(--mono);font-weight:600;color:var(--gs-bog-deep)">22</span> products · South Tipperary
+            </div>
+        </div>
+
+        <!-- Category filter tabs -->
+        <div class="gift-filters" data-anim style="--anim-delay:0.06s">
+            <button class="filter-tab active" data-cat="all">All</button>
+            <button class="filter-tab" data-cat="Flowers">🌹 Flowers</button>
+            <button class="filter-tab" data-cat="Food &amp; Drink">🍞 Food &amp; Drink</button>
+            <button class="filter-tab" data-cat="Gifts">🎁 Gifts</button>
+            <button class="filter-tab" data-cat="Hampers">🧺 Hampers</button>
+        </div>
+
+        <!-- Occasion filter tabs -->
+        <div class="gift-filters" data-anim style="--anim-delay:0.09s;margin-bottom:24px;align-items:center">
+            <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gs-stone);white-space:nowrap">Occasion:</span>
+            <button class="filter-tab active" data-occasion="all">All</button>
+            <button class="filter-tab" data-occasion="Birthday">🎂 Birthday</button>
+            <button class="filter-tab" data-occasion="New Baby">👶 New Baby</button>
+            <button class="filter-tab" data-occasion="Sympathy">🤍 Sympathy</button>
+            <button class="filter-tab" data-occasion="Anniversary">💑 Anniversary</button>
+            <button class="filter-tab" data-occasion="Thank You">🌻 Thank You</button>
+            <button class="filter-tab" data-occasion="Congratulations">🥂 Congratulations</button>
+        </div>
+
+        <!-- Product grid -->
+        <div class="product-grid" data-anim style="--anim-delay:0.1s">
+            @foreach (var p in products)
+            {
+                <div class="product-card" data-cat="@p.Cat" data-occasions="@p.Occasions">
+                    <div class="product-card__img" style="background:#f0ede6;padding:0">
+                        @if (p.IsNew)
+                        {
+                            <span class="product-card__badge">New In</span>
+                        }
+                        <img src="@p.Img" alt="@p.Name" style="width:100%;height:100%;object-fit:cover;display:block">
+                    </div>
+                    <div class="product-card__body">
+                        <div class="product-card__shop">@p.Shop</div>
+                        <div class="product-card__name">@p.Name</div>
+                        <div class="product-card__price" style="margin-bottom:8px">@p.Price <span>+ @p.Delivery delivery</span></div>
+                        <div style="font-size:11px;color:#2d6a4f;font-weight:600;margin-bottom:12px">✉️ Free handwritten card</div>
+                        <a asp-page="/Book/Step1"
+                           asp-route-preselectedDate="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")"
+                           asp-route-preselectedShop="@p.Shop"
+                           asp-route-preselectedItem="@p.Name"
+                           asp-route-preselectedPrice="@p.Price.TrimStart('€')"
+                           class="btn-add-cart">
+                            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M1 1h2l2.5 8h7l1.5-5H4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="13" r="1" fill="currentColor"/><circle cx="11" cy="13" r="1" fill="currentColor"/></svg>
+                            Send this gift
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- How it works strip -->
+        <div class="hiw-strip" data-anim style="--anim-delay:0.18s">
+            <div class="hiw-strip-item">
+                <div class="hiw-strip-item__icon">🛍️</div>
+                <div class="hiw-strip-item__title">Choose a gift</div>
+                <div class="hiw-strip-item__desc">Pick from local shops or describe what you need</div>
+            </div>
+            <div class="hiw-strip-item">
+                <div class="hiw-strip-item__icon">⏱</div>
+                <div class="hiw-strip-item__title">Pick the moment</div>
+                <div class="hiw-strip-item__desc">Choose your delivery time — we guarantee the window</div>
+            </div>
+            <div class="hiw-strip-item">
+                <div class="hiw-strip-item__icon">✉️</div>
+                <div class="hiw-strip-item__title">Add a card</div>
+                <div class="hiw-strip-item__desc">Handwritten on cream card, tied with twine</div>
+            </div>
+            <div class="hiw-strip-item">
+                <div class="hiw-strip-item__icon">📸</div>
+                <div class="hiw-strip-item__title">Photo on delivery</div>
+                <div class="hiw-strip-item__desc">See the doorstep moment as it happens</div>
+            </div>
+        </div>
+    </main>
+
+</div>
+
+<!-- Mobile sticky bottom CTA (visible only on small/tablet screens) -->
+<div class="d-flex d-lg-none align-items-center justify-content-between gap-3 px-4 py-3"
+     style="position:fixed;bottom:0;left:0;right:0;z-index:100;
+            background:rgba(250,246,236,0.95);backdrop-filter:blur(12px);
+            border-top:1px solid var(--gs-mist);box-shadow:0 -4px 16px rgba(20,17,12,0.08)">
+    <div>
+        <div style="font-size:12px;font-weight:700;color:var(--gs-bog-deep)"><span id="mobileProductCount">22</span> local gifts</div>
+        <div style="font-size:11px;color:var(--gs-stone)">South Tipperary · Free card included</div>
+    </div>
+    <a asp-page="/Book/Step1" class="btn btn-gold" style="white-space:nowrap;font-size:14px;padding:10px 20px">
+        Send a gift →
+    </a>
+</div>
+
+<!-- Spacer so content doesn't hide behind sticky bar on mobile -->
+<div class="d-lg-none" style="height:72px"></div>
+
+@section Scripts {
+<script>
+(function() {
+    var activeCat     = 'all';
+    var activeOccasion = 'all';
+
+    function filterProducts() {
+        var cards = document.querySelectorAll('.product-card');
+        var shown = 0;
+        var catCounts = {};
+        cards.forEach(function(card) {
+            var cat      = card.getAttribute('data-cat') || '';
+            var occasions = card.getAttribute('data-occasions') || '';
+            var catMatch = activeCat === 'all' || cat === activeCat;
+            var occMatch = activeOccasion === 'all' || occasions.split(',').indexOf(activeOccasion) !== -1;
+            if (catMatch && occMatch) {
+                card.style.display = '';
+                shown++;
+            } else {
+                card.style.display = 'none';
+            }
+            // Count per category (regardless of cat filter, but respecting occasion filter)
+            if (activeOccasion === 'all' || occasions.split(',').indexOf(activeOccasion) !== -1) {
+                catCounts[cat] = (catCounts[cat] || 0) + 1;
+            }
+        });
+        var countEl = document.getElementById('productCount');
+        if (countEl) countEl.textContent = shown;
+        var mobileCount = document.getElementById('mobileProductCount');
+        if (mobileCount) mobileCount.textContent = shown;
+        // Update sidebar badge counts
+        var total = 0;
+        Object.keys(catCounts).forEach(function(c) { total += catCounts[c]; });
+        document.querySelectorAll('.gift-cat-link__count').forEach(function(el) {
+            var btn = el.closest('[data-cat]');
+            if (!btn) return;
+            var cat = btn.getAttribute('data-cat');
+            el.textContent = cat === 'all' ? total : (catCounts[cat] || 0);
+        });
+    }
+
+    // Category filter tabs (main content area)
+    document.querySelectorAll('.filter-tab[data-cat]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            activeCat = this.getAttribute('data-cat');
+            document.querySelectorAll('.filter-tab[data-cat]').forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            // Sync sidebar
+            document.querySelectorAll('.gift-cat-link[data-cat]').forEach(function(b) {
+                b.classList.toggle('active', b.getAttribute('data-cat') === activeCat);
+            });
+            filterProducts();
+        });
+    });
+
+    // Sidebar category links
+    document.querySelectorAll('.gift-cat-link[data-cat]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            activeCat = this.getAttribute('data-cat');
+            document.querySelectorAll('.gift-cat-link[data-cat]').forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            // Sync main tabs
+            document.querySelectorAll('.filter-tab[data-cat]').forEach(function(b) {
+                b.classList.toggle('active', b.getAttribute('data-cat') === activeCat);
+            });
+            filterProducts();
+            // Scroll to product grid on mobile
+            var grid = document.querySelector('.product-grid');
+            if (grid && window.innerWidth < 768) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    // Occasion filter tabs
+    document.querySelectorAll('.filter-tab[data-occasion]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            activeOccasion = this.getAttribute('data-occasion');
+            document.querySelectorAll('.filter-tab[data-occasion]').forEach(function(b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            filterProducts();
+        });
+    });
+
+    // Sync gift-date picker → book button URL
+    var giftDateInput = document.getElementById('giftDate');
+    var giftBookBtn   = document.getElementById('giftBookBtn');
+    if (giftDateInput && giftBookBtn) {
+        giftDateInput.addEventListener('change', function() {
+            giftBookBtn.href = '/Book/Step1?preselectedDate=' + encodeURIComponent(giftDateInput.value);
+        });
+    }
+})();
+</script>
+}

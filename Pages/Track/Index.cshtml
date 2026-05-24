@@ -1,0 +1,381 @@
+@page "/track"
+@model IndexModel
+@{
+    ViewData["Title"] = Model.Order is not null ? $"Order {Model.Order.Reference} — TippSend" : "Track Your Order — TippSend";
+    var o = Model.Order;
+}
+
+@section Styles {
+<style>
+body { background: var(--gs-cream); }
+.track-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100vh - 72px);
+}
+@@media (max-width: 768px) { .track-layout { grid-template-columns: 1fr; } }
+
+/* Sidebar */
+.track-sidebar {
+    background: var(--gs-paper);
+    border-right: 1px solid var(--gs-mist);
+    padding: 32px 16px;
+}
+.track-sidebar__brand {
+    font-family: var(--display);
+    font-size: 18px;
+    color: var(--gs-bog-deep);
+    font-weight: 500;
+    padding: 0 12px;
+    margin-bottom: 28px;
+    display: flex; align-items: center; gap: 8px;
+}
+.track-sidebar__brand span { font-style: italic; color: var(--gs-gold-deep); }
+.track-nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--r-sm);
+    font-size: 14px; font-weight: 500;
+    color: var(--gs-ink-2);
+    text-decoration: none;
+    margin-bottom: 4px;
+    transition: background 0.15s;
+    cursor: pointer;
+}
+.track-nav-item:hover { background: var(--gs-cream); color: var(--gs-bog-deep); }
+.track-nav-item.active { background: var(--gs-cream); color: var(--gs-bog-deep); font-weight: 600; }
+.track-nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.track-sidebar__bottom { margin-top: auto; padding-top: 24px; border-top: 1px solid var(--gs-mist); margin-top: 32px; }
+@@media (max-width: 768px) { .track-sidebar { display: none; } }
+
+/* Main */
+.track-main { padding: 40px 48px; background: var(--gs-cream); }
+@@media (max-width: 900px) { .track-main { padding: 28px 20px; } }
+
+/* Search bar */
+.track-search {
+    display: flex; gap: 0;
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-pill);
+    background: white;
+    overflow: hidden;
+    max-width: 480px;
+    margin-bottom: 32px;
+}
+.track-search input {
+    flex: 1; border: none; outline: none;
+    padding: 12px 20px;
+    font-size: 14px; font-family: var(--sans);
+    background: transparent;
+}
+.track-search button {
+    background: var(--gs-bog-deep); color: var(--gs-cream);
+    border: none; padding: 12px 20px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s;
+}
+.track-search button:hover { background: var(--gs-bog); }
+
+/* Status card */
+.status-card {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    align-items: center;
+}
+@@media (max-width: 600px) { .status-card { grid-template-columns: 1fr; } }
+.status-card__label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gs-stone); margin-bottom: 6px; }
+.status-card__val { font-size: 16px; font-weight: 600; color: var(--gs-bog-deep); }
+.status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: var(--r-pill);
+    font-size: 12px; font-weight: 700;
+    background: var(--gs-gold); color: var(--gs-bog-deep);
+}
+.status-badge.delivered { background: var(--gs-bog-deep); color: var(--gs-cream); }
+.status-badge.cancelled { background: #fee; color: var(--gs-claret); }
+
+/* Timeline */
+.timeline-card {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    padding: 24px 28px;
+    margin-bottom: 20px;
+}
+.timeline-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    padding: 12px 0;
+}
+.timeline-steps::before {
+    content: '';
+    position: absolute;
+    top: 24px; left: 20px; right: 20px;
+    height: 2px;
+    background: var(--gs-mist);
+    z-index: 0;
+}
+.timeline-step-item { flex: 1; text-align: center; position: relative; z-index: 1; }
+.timeline-step-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--gs-mist); border: 2px solid white;
+    margin: 0 auto 8px;
+    display: flex; align-items: center; justify-content: center;
+}
+.timeline-step-dot.done { background: var(--gs-bog-deep); }
+.timeline-step-dot.active { background: var(--gs-gold); box-shadow: 0 0 0 4px rgba(201,162,75,0.2); }
+.timeline-step-dot svg { width: 10px; height: 10px; fill: white; }
+.timeline-step-label { font-size: 11px; color: var(--gs-stone); font-weight: 500; }
+.timeline-step-label.done { color: var(--gs-bog-deep); font-weight: 600; }
+.timeline-step-label.active { color: var(--gs-gold-deep); font-weight: 700; }
+.timeline-step-time { font-size: 10px; color: var(--gs-stone); margin-top: 2px; font-family: var(--mono); }
+
+/* Info grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+@@media (max-width: 640px) { .info-grid { grid-template-columns: 1fr; } }
+.info-card {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    padding: 20px 24px;
+}
+.info-card h4 { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gs-stone); margin-bottom: 12px; }
+.info-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--gs-mist); }
+.info-row:last-child { border-bottom: none; }
+.info-row span:first-child { color: var(--gs-stone); }
+.info-row span:last-child { font-weight: 500; color: var(--gs-bog-deep); }
+
+/* Empty state */
+.track-empty {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    padding: 48px 32px;
+    text-align: center;
+    max-width: 480px;
+}
+</style>
+}
+
+<!-- Mobile breadcrumb nav (visible only on mobile where sidebar is hidden) -->
+<div class="d-flex d-md-none align-items-center gap-2 px-3 py-2 border-bottom"
+     style="background:var(--gs-paper);position:sticky;top:72px;z-index:20">
+    <a href="/" style="font-size:13px;color:var(--gs-stone);text-decoration:none;display:flex;align-items:center;gap:4px">← Home</a>
+    <span style="color:var(--gs-mist);font-size:12px">|</span>
+    <span style="font-size:13px;color:var(--gs-bog-deep);font-weight:600">Track Your Order</span>
+</div>
+
+<div class="track-layout">
+
+    <!-- Sidebar (desktop only, hidden on mobile via CSS) -->
+    <aside class="track-sidebar">
+        <div class="track-sidebar__brand">
+            Tipp<span>Send</span>
+        </div>
+        <a href="/track" class="track-nav-item active">
+            <span class="track-nav-icon">📦</span> Track Order
+        </a>
+        <a href="/support" class="track-nav-item">
+            <span class="track-nav-icon">💬</span> Support
+        </a>
+        <div class="track-sidebar__bottom">
+            <a href="/" class="track-nav-item" style="color:var(--gs-stone);font-size:13px">
+                <span class="track-nav-icon">←</span> Back to home
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="track-main">
+        <h1 style="font-family:var(--display);font-weight:400;font-size:clamp(28px,4vw,40px);letter-spacing:-0.02em;color:var(--gs-bog-deep);margin-bottom:8px" data-anim>
+            Track Your Order
+        </h1>
+        <p style="color:var(--gs-stone);margin-bottom:28px;font-size:15px" data-anim style="--anim-delay:0.06s">
+            Enter your order number or open the link from your confirmation email.
+        </p>
+
+        <form method="get" data-anim style="--anim-delay:0.1s">
+            <div class="track-search">
+                <input type="text" name="token" value="@Model.Token" placeholder="e.g. TS-123456 or tracking token" />
+                <button type="submit">Track →</button>
+            </div>
+        </form>
+
+        @if (Model.ErrorMessage != null)
+        {
+            <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:var(--r-sm);padding:12px 16px;margin-bottom:20px;font-size:14px;color:#856404">
+                @Model.ErrorMessage
+            </div>
+        }
+
+        @if (o is null && Model.Token != null)
+        {
+            <div class="track-empty" data-anim>
+                <div style="font-size:48px;margin-bottom:16px">🔍</div>
+                <h3 style="font-weight:500;color:var(--gs-bog-deep);margin-bottom:8px">Order not found</h3>
+                <p style="color:var(--gs-stone);font-size:14px;margin-bottom:24px">
+                    Check your confirmation email for the correct tracking link or reference number.
+                </p>
+                <a href="mailto:hello@tippsend.ie" class="btn btn-outline-cream" style="font-size:14px">Contact support</a>
+            </div>
+        }
+
+        @if (o is null && Model.Token == null)
+        {
+            <div class="track-empty" data-anim style="--anim-delay:0.14s">
+                <div style="font-size:48px;margin-bottom:16px">📦</div>
+                <h3 style="font-weight:500;color:var(--gs-bog-deep);margin-bottom:8px">No order selected</h3>
+                <p style="color:var(--gs-stone);font-size:14px">
+                    Enter your tracking reference above, or check your confirmation email for a direct tracking link.
+                </p>
+            </div>
+        }
+
+        @if (o is not null)
+        {
+            var statusLabel = o.Status switch {
+                    OrderStatus.Queued     => "Queued",
+                    OrderStatus.Confirmed  => "Confirmed",
+                    OrderStatus.Collected  => "Collected",
+                    OrderStatus.InTransit  => "Out for Delivery",
+                    OrderStatus.Delivered  => "Delivered",
+                    OrderStatus.Failed     => "Issue",
+                    _                     => o.Status.ToString()
+                };
+            var badgeClass = o.Status == OrderStatus.Delivered ? "delivered" :
+                             o.Status == OrderStatus.Failed    ? "cancelled" : "";
+
+            <!-- Status card -->
+            <div class="status-card" data-anim>
+                <div>
+                    <div class="status-card__label">Order ID</div>
+                    <div class="status-card__val" style="font-family:var(--mono)">@o.Reference</div>
+                </div>
+                <div>
+                    <div class="status-card__label">Status</div>
+                    <span class="status-badge @badgeClass">@statusLabel</span>
+                </div>
+                <div>
+                    <div class="status-card__label">Estimated delivery</div>
+                    <div class="status-card__val">@o.DeliveryDate.ToString("ddd d MMM") · @o.WindowLabel</div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="timeline-card" data-anim style="--anim-delay:0.06s">
+                <h4 style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gs-stone);margin-bottom:16px">Delivery timeline</h4>
+                <div class="timeline-steps">
+                    @{
+                        var steps2 = new[] {
+                            ("Order Placed", o.CreatedAt as DateTime?, o.Status >= OrderStatus.Queued, o.Status == OrderStatus.Queued),
+                            ("Picked Up",    o.CollectedAt,            o.Status >= OrderStatus.Collected, o.Status == OrderStatus.Collected),
+                            ("Out for Delivery", o.InTransitAt,        o.Status >= OrderStatus.InTransit, o.Status == OrderStatus.InTransit),
+                            ("Delivered",    o.DeliveredAt,            o.Status == OrderStatus.Delivered, false),
+                        };
+                    }
+                    @foreach (var (lbl, ts, done, active) in steps2)
+                    {
+                        <div class="timeline-step-item">
+                            <div class="timeline-step-dot @(done ? "done" : active ? "active" : "")">
+                                @if (done) { <svg viewBox="0 0 10 10"><polyline points="1,5 4,8 9,2" fill="none" stroke="white" stroke-width="1.5"/></svg> }
+                            </div>
+                            <div class="timeline-step-label @(done ? "done" : active ? "active" : "")">@lbl</div>
+                            @if (ts.HasValue && done)
+                            {
+                                <div class="timeline-step-time">@ts.Value.ToLocalTime().ToString("h:mm tt")</div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Info grid -->
+            <div class="info-grid" data-anim style="--anim-delay:0.1s">
+                <div class="info-card">
+                    <h4>Order details</h4>
+                    <div class="info-row"><span>Item</span><span>@o.ItemDescription</span></div>
+                    <div class="info-row"><span>From</span><span>@(o.Shop?.Name ?? o.ShopNameOverride)</span></div>
+                    <div class="info-row"><span>To</span><span>@o.RecipientName</span></div>
+                    <div class="info-row"><span>Address</span><span>@o.RecipientAddress</span></div>
+                    <div class="info-row"><span>Total</span><span style="font-family:var(--mono);color:var(--gs-gold-deep)">€@o.Total.ToString("F2")</span></div>
+                </div>
+                <div class="info-card">
+                    <h4>Delivery notes</h4>
+                    <p style="font-size:13px;color:var(--gs-stone);line-height:1.5;margin:0">
+                        @(string.IsNullOrEmpty(o.CardMessage) ? "No special instructions." : o.CardMessage)
+                    </p>
+                    @if (o.Status == OrderStatus.Delivered && o.DeliveryPhotoPath != null)
+                    {
+                        <div style="margin-top:16px">
+                            <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gs-stone);margin-bottom:8px">Delivery photo</div>
+                            <img src="@o.DeliveryPhotoPath" alt="Delivery photo" style="width:100%;border-radius:var(--r-sm);border:1px solid var(--gs-mist)" />
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (o.Status == OrderStatus.Delivered)
+            {
+                if (!o.Rating.HasValue)
+                {
+                    <div class="info-card" style="text-align:center;padding:28px" data-anim style="--anim-delay:0.14s">
+                        <div style="font-weight:600;color:var(--gs-bog-deep);margin-bottom:16px">How did we do?</div>
+                        <form method="post" asp-page-handler="Rate" style="display:flex;gap:8px;justify-content:center">
+                            <input type="hidden" name="token" value="@Model.Token" />
+                            @for (int star = 5; star >= 1; star--)
+                            {
+                                <button type="submit" name="rating" value="@star"
+                                    style="width:44px;height:44px;border-radius:50%;border:1.5px solid var(--gs-mist);background:white;font-size:20px;cursor:pointer;transition:all 0.15s"
+                                    onmouseover="this.style.borderColor='var(--gs-gold)'"
+                                    onmouseout="this.style.borderColor='var(--gs-mist)'">★</button>
+                            }
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div style="text-align:center;padding:16px;font-size:20px;color:var(--gs-gold)">
+                        @string.Concat(Enumerable.Repeat("★", o.Rating.Value))@string.Concat(Enumerable.Repeat("☆", 5 - o.Rating.Value))
+                        <div style="font-size:13px;color:var(--gs-stone);margin-top:4px">Thank you for your feedback!</div>
+                    </div>
+                }
+            }
+
+            <div style="margin-top:24px" data-anim>
+                <a href="/gift" class="btn btn-gold">Send another gift →</a>
+            </div>
+        }
+    </main>
+</div>
+
+@if (o?.Status == OrderStatus.InTransit && o.DeliveryDate != DateTime.MinValue)
+{
+    @section Scripts {
+    <script>
+    (function() {
+        var target = new Date('@o.DeliveryDate.ToString("yyyy-MM-dd")T@($"{o.DeliveryWindowStart.Hours:D2}:{o.DeliveryWindowStart.Minutes:D2}:00")');
+        function tick() {
+            var diff = target - new Date();
+            if (diff <= 0) { return; }
+            var m = Math.floor(diff/60000), s = Math.floor((diff%60000)/1000);
+            var el = document.querySelector('.status-card__val[data-countdown]');
+            if (el) el.textContent = 'Today by ' + m + ' min';
+            setTimeout(tick, 1000);
+        }
+        tick();
+    })();
+    </script>
+    }
+}

@@ -1,0 +1,88 @@
+@page "/send/return"
+@model TippSendApp.Pages.Send.ReturnModel
+@{
+    ViewData["Title"] = "Booking Confirmed — TippSend";
+}
+
+@section Styles {
+<style>
+body { background: var(--gs-cream); }
+.return-wrap {
+    min-height: calc(100vh - 140px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+}
+.return-card {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    padding: 52px 44px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: var(--shadow-2);
+    text-align: center;
+}
+@@media (max-width: 480px) { .return-card { padding: 36px 24px; } }
+.return-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gs-mist);
+    font-size: 14px;
+    text-align: left;
+}
+.return-detail-row:last-child { border-bottom: none; }
+.return-detail-row span:first-child { color: var(--gs-stone); }
+.return-detail-row span:last-child { font-weight: 500; color: var(--gs-bog-deep); }
+</style>
+}
+
+<div class="return-wrap">
+    <div class="return-card" data-anim>
+        @if (Model.Failed)
+        {
+            <div style="font-size:3rem;margin-bottom:16px">⚠️</div>
+            <h2 style="font-weight:400;color:var(--gs-bog-deep);margin-bottom:12px">Something went wrong</h2>
+            <p style="color:var(--gs-stone);margin-bottom:28px">
+                We couldn't confirm your payment. If you were charged, please contact us at
+                <a href="mailto:hello@tippsend.ie" style="color:var(--gs-gold-deep)">hello@tippsend.ie</a> and we'll sort it immediately.
+            </p>
+            <a href="/send" class="btn btn-outline-cream">Try again</a>
+        }
+        else
+        {
+            <div style="font-size:3.5rem;margin-bottom:16px">✅</div>
+            <h2 style="font-weight:400;letter-spacing:-0.02em;color:var(--gs-bog-deep);margin-bottom:8px">Booking confirmed!</h2>
+            <p style="color:var(--gs-stone);font-family:var(--display);font-style:italic;font-size:17px;margin-bottom:32px">
+                We'll collect it, deliver it, and send you a photo.
+            </p>
+
+            @if (Model.Booking is not null)
+            {
+                var b = Model.Booking;
+                var dateDisplay = DateTime.TryParse(b.PreferredDate, out var d) ? d.ToString("dddd d MMMM") : b.PreferredDate;
+                var timeDisplay = TimeSpan.TryParse(b.PreferredTime, out var t) ? DateTime.Today.Add(t).ToString("h:mm tt") : b.PreferredTime;
+
+                <div style="background:var(--gs-cream-deep);border-radius:var(--r-md);padding:20px 24px;margin-bottom:28px;text-align:left">
+                    <div class="return-detail-row"><span>Pickup</span><span>@b.PickupAddress</span></div>
+                    <div class="return-detail-row"><span>Drop-off</span><span>@b.DropoffAddress</span></div>
+                    <div class="return-detail-row"><span>Item</span><span>@b.ItemDescription</span></div>
+                    <div class="return-detail-row"><span>Date</span><span>@dateDisplay</span></div>
+                    <div class="return-detail-row"><span>Time</span><span>@timeDisplay</span></div>
+                    <div class="return-detail-row" style="border-bottom:none;padding-top:14px">
+                        <span style="font-weight:600;color:var(--gs-bog-deep)">Total paid</span>
+                        <span style="font-family:var(--mono);font-size:20px;color:var(--gs-gold-deep);font-weight:600">€@b.Price.ToString("F2")</span>
+                    </div>
+                </div>
+            }
+
+            <p style="font-size:13px;color:var(--gs-stone);margin-bottom:24px">
+                A confirmation has been sent to your email. We'll be in touch if anything changes.
+            </p>
+            <a href="/" class="btn btn-gold">Back to home →</a>
+        }
+    </div>
+</div>

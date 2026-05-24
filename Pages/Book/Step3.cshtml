@@ -1,0 +1,146 @@
+@page
+@model Step3Model
+@{
+    ViewData["Title"] = "Choose the moment";
+    var selectedSlot = $"{Model.DeliveryHour:D2}:{Model.DeliveryMinute:D2}";
+}
+
+<div class="py-5" style="background:var(--gs-paper);min-height:80vh">
+    <div class="container-xl">
+        <div class="text-center mb-4">
+            <div class="booking-progress mb-3">
+                <span class="step-dot done"></span>
+                <span class="step-dot done"></span>
+                <span class="step-dot active"></span>
+                <span class="step-dot"></span>
+            </div>
+            <h2>Choose the moment</h2>
+            <p class="text-muted small">Step 3 of 4</p>
+        </div>
+
+        <div class="booking-step-card">
+            <form method="post" id="step3form">
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Delivery date</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var (date, label, isSunday) in Model.DateOptions)
+                        {
+                            <label class="date-chip @(date.Date == Model.DeliveryDate.Date ? "active" : "")">
+                                <input type="radio" name="DeliveryDate" value="@date.ToString("yyyy-MM-dd")"
+                                       @(date.Date == Model.DeliveryDate.Date ? "checked" : "") hidden />
+                                <span>@label @(isSunday ? "<span class='text-warning small'>+€8</span>" : "")</span>
+                            </label>
+                        }
+                    </div>
+                    <span asp-validation-for="DeliveryDate" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Delivery zone</label>
+                    <div class="d-flex gap-2 flex-wrap">
+                        @foreach (var zone in Enum.GetValues<PricingZone>())
+                        {
+                            var zoneDesc = zone switch
+                            {
+                                PricingZone.A => "Zone A — Clonmel town (0–5 km)",
+                                PricingZone.B => "Zone B — Inner ring (9–20 km)",
+                                PricingZone.C => "Zone C — Outer ring (20–25 km)",
+                                _ => ""
+                            };
+                            <label class="d-flex align-items-center gap-2 p-2 rounded border cursor-pointer @(Model.Zone == zone ? "border-warning bg-light" : "")">
+                                <input type="radio" name="Zone" value="@zone" @(Model.Zone == zone ? "checked" : "") />
+                                @zoneDesc
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Precision tier</label>
+                    <div class="d-flex gap-2 flex-wrap">
+                        @foreach (var tier in Enum.GetValues<DeliveryTier>())
+                        {
+                            var (tierLabel, tierClass, tierDesc) = tier switch
+                            {
+                                DeliveryTier.Standard => ("Standard", "tier-standard", "±90 min · Most affordable"),
+                                DeliveryTier.Precision => ("Precision", "tier-precision", "±30 min · Popular choice"),
+                                DeliveryTier.ExactMoment => ("Exact Moment", "tier-exact", "±5 min · Arrives on cue"),
+                                _ => ("", "", "")
+                            };
+                            <label class="p-3 rounded border @(Model.Tier == tier ? "border-warning" : "") d-flex align-items-center gap-2" style="cursor:pointer;min-width:160px">
+                                <input type="radio" name="Tier" value="@tier" @(Model.Tier == tier ? "checked" : "") />
+                                <div>
+                                    <div><span class="tier-badge @tierClass">@tierLabel</span></div>
+                                    <div class="text-muted" style="font-size:0.78rem;margin-top:3px">@tierDesc</div>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Delivery time</label>
+                    <div class="slot-grid">
+                        @foreach (var (h, m) in Step3Model.GetTimeSlots())
+                        {
+                            var slotStr = $"{h:D2}:{m:D2}";
+                            var isEvening = h >= 18;
+                            <button type="button"
+                                    class="slot-btn @(isEvening ? "evening" : "") @(slotStr == selectedSlot ? "selected" : "")"
+                                    onclick="selectSlot(@h, @m, this)">
+                                @slotStr
+                                @if (isEvening) { <div style="font-size:0.65rem;opacity:0.7">+€8</div> }
+                            </button>
+                        }
+                    </div>
+                    <input type="hidden" asp-for="DeliveryHour" id="hiddenHour" />
+                    <input type="hidden" asp-for="DeliveryMinute" id="hiddenMinute" />
+                </div>
+
+                <!-- Live price preview -->
+                <div class="p-3 rounded mb-4" style="background:var(--gs-bog);color:var(--gs-cream)">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Estimated total</span>
+                        <span class="fw-bold" style="font-family:monospace;font-size:1.2rem;color:var(--gs-gold)">€@Model.EstimatedTotal.ToString("F2")</span>
+                    </div>
+                    <div class="small mt-1" style="color:var(--gs-fog)">
+                        Service fee €@Model.ServiceFee
+                        @if (Model.Surcharge > 0) { <span> + surcharge €@Model.Surcharge</span> }
+                        + item + 8% markup
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a asp-page="Step2" class="btn btn-link text-muted">← Back</a>
+                    <button type="submit" class="btn btn-gold btn-lg px-5">Next: Add a card →</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+<style>
+.date-chip { padding:.4rem .85rem; border-radius:20px; border:1.5px solid var(--gs-fog); cursor:pointer; font-size:.85rem; background:white; }
+.date-chip.active { background:var(--gs-gold); border-color:var(--gs-gold); font-weight:600; }
+.date-chip input { display:none; }
+</style>
+}
+
+@section Scripts {
+<script>
+function selectSlot(h, m, el) {
+    document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('hiddenHour').value = h;
+    document.getElementById('hiddenMinute').value = m;
+}
+
+document.querySelectorAll('.date-chip').forEach(c => {
+    c.addEventListener('click', () => {
+        document.querySelectorAll('.date-chip').forEach(x => x.classList.remove('active'));
+        c.classList.add('active');
+    });
+});
+</script>
+}

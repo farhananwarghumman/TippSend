@@ -1,0 +1,176 @@
+@page
+@model TippSendApp.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Admin";
+}
+
+<div class="admin-header">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <span class="footer-brand" style="font-size:1.2rem">TippSend Admin</span>
+        <a asp-page="/Operator/Dashboard" class="btn btn-sm btn-outline-cream">Operator Dashboard</a>
+    </div>
+</div>
+
+<div class="container-fluid py-4" style="max-width:960px;margin:0 auto">
+
+    <!-- Live metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded border text-center" style="background:white">
+                <div style="font-size:1.8rem;font-weight:700;font-family:var(--mono)">@Model.OrdersToday</div>
+                <div class="text-muted small mt-1">Orders today</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded border text-center" style="background:white">
+                <div style="font-size:1.8rem;font-weight:700;font-family:var(--mono);color:#5cb85c">@Model.DeliveredToday</div>
+                <div class="text-muted small mt-1">Delivered today</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded border text-center" style="background:white">
+                <div style="font-size:1.8rem;font-weight:700;font-family:var(--mono);color:var(--gs-gold)">€@Model.RevenueThisWeek.ToString("N0")</div>
+                <div class="text-muted small mt-1">Revenue this week</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded border text-center" style="background:white">
+                <div style="font-size:1.8rem;font-weight:700;font-family:var(--mono);color:var(--gs-gold)">€@Model.RevenueThisMonth.ToString("N0")</div>
+                <div class="text-muted small mt-1">Revenue this month</div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.PendingAllTime > 0)
+    {
+        <div class="alert py-2 mb-4 d-flex align-items-center gap-2"
+             style="background:#fff8e1;border:1px solid #ffe082;color:#795548">
+            <strong>@Model.PendingAllTime</strong> order@(Model.PendingAllTime == 1 ? "" : "s") still pending across all dates
+            <a asp-page="/Admin/Orders/Index" class="ms-auto btn btn-sm btn-outline-secondary">View →</a>
+        </div>
+    }
+
+    <!-- OPERATIONS -->
+    <div class="section-label">Operations</div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <a asp-page="/Operator/Dashboard" class="text-decoration-none">
+                <div class="tile p-4 rounded border d-flex align-items-center gap-3" style="background:var(--gs-bog-deep);color:var(--gs-cream)">
+                    <div style="font-size:2rem">📋</div>
+                    <div>
+                        <div class="fw-semibold">Operator Dashboard</div>
+                        <div style="opacity:.7;font-size:.85rem">@Model.PendingToday pending · @Model.DeliveredToday delivered today</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a asp-page="/Admin/Orders/Index" class="text-decoration-none">
+                <div class="tile p-4 rounded border d-flex align-items-center gap-3 bg-white">
+                    <div style="font-size:2rem">📦</div>
+                    <div>
+                        <div class="fw-semibold">All Orders</div>
+                        <div class="text-muted small">Search, filter and manage every order</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a asp-page="/Admin/Revenue" class="text-decoration-none">
+                <div class="tile p-4 rounded border d-flex align-items-center gap-3 bg-white">
+                    <div style="font-size:2rem">📊</div>
+                    <div>
+                        <div class="fw-semibold">Revenue</div>
+                        <div class="text-muted small">Weekly, monthly &amp; all-time summary</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- GIFT & DELIVER -->
+    <div class="section-label">Gift &amp; Deliver</div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <a asp-page="/Admin/Shops/Index" class="text-decoration-none">
+                <div class="tile p-4 rounded border d-flex align-items-center gap-3 bg-white">
+                    <div style="font-size:2rem">🏪</div>
+                    <div>
+                        <div class="fw-semibold">Shops</div>
+                        <div class="text-muted small">Add and edit the local shop directory</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a asp-page="/Admin/Pricing/Index" class="text-decoration-none">
+                <div class="tile p-4 rounded border d-flex align-items-center gap-3 bg-white">
+                    <div style="font-size:2rem">💶</div>
+                    <div>
+                        <div class="fw-semibold">Pricing</div>
+                        <div class="text-muted small">Tier &amp; zone fee reference table</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- B2B / PARTNER -->
+    <div class="section-label">Business (B2B)</div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <a asp-page="/Admin/B2BAccounts/Index" class="text-decoration-none">
+                <div class="tile p-4 rounded border d-flex align-items-center gap-3 bg-white">
+                    <div style="font-size:2rem">🏢</div>
+                    <div>
+                        <div class="fw-semibold">B2B Accounts</div>
+                        <div class="text-muted small">Business contracts &amp; retainer clients</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a asp-page="/Admin/B2BAccounts/Invoice" class="text-decoration-none">
+                <div class="tile p-4 rounded border d-flex align-items-center gap-3 bg-white">
+                    <div style="font-size:2rem">🧾</div>
+                    <div>
+                        <div class="fw-semibold">B2B Invoices</div>
+                        <div class="text-muted small">Generate monthly client invoices</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- CONFIGURATION -->
+    <div class="section-label">Configuration</div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <a asp-page="/Admin/Settings" class="text-decoration-none">
+                <div class="tile p-4 rounded border d-flex align-items-center gap-3 bg-white">
+                    <div style="font-size:2rem">⚙️</div>
+                    <div>
+                        <div class="fw-semibold">Settings</div>
+                        <div class="text-muted small">Operating hours &amp; booking notice</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<style>
+.section-label {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #999;
+    padding: .25rem 0 .5rem;
+    border-bottom: 1px solid #eee;
+    margin-bottom: .75rem;
+}
+.tile { transition: box-shadow .15s; }
+.tile:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+</style>

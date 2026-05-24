@@ -1,0 +1,110 @@
+@page
+@model Step4Model
+@{
+    ViewData["Title"] = "Card & Summary";
+    var s = Model.Session!;
+    var window = new TimeSpan(s.DeliveryHour, s.DeliveryMinute, 0);
+    var windowStr = $"{s.DeliveryHour:D2}:{s.DeliveryMinute:D2}";
+    var precMin = TippSendApp.Services.PricingService.GetPrecisionMinutes(s.Tier);
+}
+
+<div class="py-5" style="background:var(--gs-paper);min-height:80vh">
+    <div class="container-xl">
+        <div class="text-center mb-4">
+            <div class="booking-progress mb-3">
+                <span class="step-dot done"></span>
+                <span class="step-dot done"></span>
+                <span class="step-dot done"></span>
+                <span class="step-dot active"></span>
+            </div>
+            <h2>Card & Summary</h2>
+            <p class="text-muted small">Step 4 of 4</p>
+        </div>
+
+        <div class="booking-step-card">
+            <form method="post">
+                <!-- Card message -->
+                <div class="mb-4">
+                    <label asp-for="CardMessage" class="form-label fw-semibold">Your card message</label>
+                    <textarea asp-for="CardMessage" class="card-message-area" maxlength="220"
+                              placeholder="Write a personal message here — hand-printed on cream card, tied with twine."
+                              oninput="updateCount(this)"></textarea>
+                    <div class="d-flex justify-content-between mt-1">
+                        <span asp-validation-for="CardMessage" class="text-danger small"></span>
+                        <span class="text-muted small"><span id="charCount">@Model.CardMessage.Length</span>/220 characters</span>
+                    </div>
+                    <div class="form-text">Hand-printed on cream card, tied with twine. Included at no extra charge.</div>
+                </div>
+
+                <hr class="my-4" />
+
+                <!-- Order summary -->
+                <h6 class="mb-3" style="color:var(--gs-bog)">Order summary</h6>
+
+                <div class="summary-row">
+                    <span class="text-muted">Item</span>
+                    <span>@s.ItemDescription</span>
+                </div>
+                <div class="summary-row">
+                    <span class="text-muted">From</span>
+                    <span>@Model.ShopDisplayName</span>
+                </div>
+                <div class="summary-row">
+                    <span class="text-muted">To</span>
+                    <span>@s.RecipientName, @s.RecipientAddress, @s.RecipientTown</span>
+                </div>
+                <div class="summary-row">
+                    <span class="text-muted">Delivery</span>
+                    <span>
+                        @s.DeliveryDate.ToString("ddd d MMM") at @windowStr
+                        <span class="tier-badge @PricingService.GetTierBadgeClass(s.Tier) ms-1">±@precMin min</span>
+                    </span>
+                </div>
+
+                <hr class="my-3" />
+                <h6 class="mb-3" style="color:var(--gs-bog)">Pricing</h6>
+
+                <div class="summary-row">
+                    <span class="text-muted">Estimated item cost</span>
+                    <span>€@s.EstimatedItemPrice.ToString("F2")</span>
+                </div>
+                <div class="summary-row">
+                    <span class="text-muted">Item markup (8%)</span>
+                    <span>€@Model.ItemMarkup.ToString("F2")</span>
+                </div>
+                <div class="summary-row">
+                    <span class="text-muted">Service fee (@s.Tier / Zone @s.Zone)</span>
+                    <span>€@Model.ServiceFee.ToString("F2")</span>
+                </div>
+                @if (Model.Surcharge > 0)
+                {
+                    <div class="summary-row">
+                        <span class="text-muted">Evening / Sunday surcharge</span>
+                        <span>€@Model.Surcharge.ToString("F2")</span>
+                    </div>
+                }
+                <div class="summary-row total-row">
+                    <span>Estimated total</span>
+                    <span>€@Model.EstimatedTotal.ToString("F2")</span>
+                </div>
+
+                <div class="p-3 rounded mt-3 mb-4" style="background:#f0f8f4;border:1px solid #c8e6d8;font-size:0.82rem">
+                    Final item cost may vary slightly if the shop price differs from your estimate. We'll notify you before exceeding your budget cap of €@s.BudgetCap.ToString("F2").
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a asp-page="Step3" class="btn btn-link text-muted">← Back</a>
+                    <button type="submit" class="btn btn-gold btn-lg px-5">Confirm & Place Order →</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function updateCount(el) {
+    document.getElementById('charCount').textContent = el.value.length;
+}
+</script>
+}

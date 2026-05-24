@@ -1,0 +1,85 @@
+@page
+@model TippSendApp.Pages.Admin.Orders.IndexModel
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="admin-header">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <a asp-page="/Admin/Index" style="color:var(--gs-fog);text-decoration:none">← Admin</a>
+            <span class="footer-brand" style="font-size:1.1rem">Orders</span>
+        </div>
+        <a asp-page="/Operator/Dashboard" class="btn btn-sm btn-outline-cream">Dashboard</a>
+    </div>
+</div>
+
+<div class="container-fluid py-3">
+    <!-- Filters -->
+    <form method="get" class="d-flex gap-2 flex-wrap mb-3">
+        <input type="text" name="Search" value="@Model.Search" class="form-control" style="max-width:220px" placeholder="Search name / ref..." />
+        <input type="date" name="Date" value="@Model.Date?.ToString("yyyy-MM-dd")" class="form-control" style="max-width:160px" />
+        <select name="Status" class="form-select" style="max-width:160px">
+            <option value="">All statuses</option>
+            @foreach (var s in Enum.GetValues<OrderStatus>())
+            {
+                if (Model.Status == s.ToString()) { <option value="@s" selected>@s</option> }
+                else { <option value="@s">@s</option> }
+            }
+        </select>
+        <button class="btn btn-dark">Filter</button>
+        <a asp-page="Index" class="btn btn-outline-secondary">Clear</a>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Reference</th>
+                    <th>Date</th>
+                    <th>Window</th>
+                    <th>Item</th>
+                    <th>Recipient</th>
+                    <th>Tier</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Orders.Any())
+                {
+                    <tr><td colspan="9" class="text-center text-muted py-4">No orders found.</td></tr>
+                }
+                @foreach (var o in Model.Orders)
+                {
+                    <tr>
+                        <td class="time-mono small">@o.Reference</td>
+                        <td class="small">@o.DeliveryDate.ToString("d MMM")</td>
+                        <td class="time-mono small">@o.WindowLabel</td>
+                        <td class="small text-truncate" style="max-width:150px">@o.ItemDescription</td>
+                        <td class="small">@o.RecipientName, @o.RecipientTown</td>
+                        <td><span class="tier-badge @TippSendApp.Services.PricingService.GetTierBadgeClass(o.Tier)" style="font-size:.65rem">@o.TierCode</span></td>
+                        <td><span class="badge @o.StatusBadgeClass">@o.Status</span></td>
+                        <td class="time-mono small">€@o.Total.ToString("F2")</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a asp-page="/Track/Index" asp-route-token="@o.TrackingToken" class="btn btn-outline-secondary btn-sm" target="_blank">Track</a>
+                                <form method="post" asp-page-handler="UpdateStatus" asp-route-id="@o.Id" class="d-flex gap-1">
+                                    <select name="newStatus" class="form-select form-select-sm" style="width:110px">
+                                        @foreach (var s in Enum.GetValues<OrderStatus>())
+                                        {
+                                            if (o.Status == s) { <option value="@s" selected>@s</option> }
+                                            else { <option value="@s">@s</option> }
+                                        }
+                                    </select>
+                                    <button class="btn btn-gold btn-sm">Update</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

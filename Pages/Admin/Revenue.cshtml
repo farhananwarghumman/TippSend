@@ -1,0 +1,121 @@
+@page
+@model TippSendApp.Pages.Admin.RevenueModel
+@{
+    ViewData["Title"] = "Revenue";
+}
+
+<div class="admin-header">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <a asp-page="/Admin/Index" style="color:var(--gs-fog);text-decoration:none">← Admin</a>
+            <span class="footer-brand" style="font-size:1.1rem">Revenue</span>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid py-4" style="max-width:900px">
+
+    <!-- Summary cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded border text-center" style="background:white">
+                <div style="font-size:1.7rem;font-weight:700;font-family:var(--mono);color:var(--gs-gold)">€@Model.RevenueThisWeek.ToString("N0")</div>
+                <div class="text-muted small mt-1">This week</div>
+                <div class="text-muted" style="font-size:.75rem">@Model.OrdersThisWeek order@(Model.OrdersThisWeek == 1 ? "" : "s")</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded border text-center" style="background:white">
+                <div style="font-size:1.7rem;font-weight:700;font-family:var(--mono);color:var(--gs-gold)">€@Model.RevenueThisMonth.ToString("N0")</div>
+                <div class="text-muted small mt-1">This month</div>
+                <div class="text-muted" style="font-size:.75rem">@Model.OrdersThisMonth order@(Model.OrdersThisMonth == 1 ? "" : "s")</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded border text-center" style="background:white">
+                <div style="font-size:1.7rem;font-weight:700;font-family:var(--mono)">€@Model.TotalAllTime.ToString("N0")</div>
+                <div class="text-muted small mt-1">All time</div>
+                <div class="text-muted" style="font-size:.75rem">delivered only</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-3 rounded border text-center" style="background:white">
+                <div style="font-size:1.7rem;font-weight:700;font-family:var(--mono)">@Model.OrdersAllTime</div>
+                <div class="text-muted small mt-1">Deliveries all time</div>
+                <div class="text-muted" style="font-size:.75rem">&nbsp;</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Weekly -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header fw-semibold">Last 8 weeks</div>
+                <div class="card-body p-0">
+                    @if (!Model.Last8Weeks.Any())
+                    {
+                        <p class="text-muted p-3 mb-0 small">No delivered orders yet.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Week</th>
+                                    <th class="text-end">Orders</th>
+                                    <th class="text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var w in Model.Last8Weeks)
+                                {
+                                    <tr>
+                                        <td>@w.Label</td>
+                                        <td class="text-end">@w.Orders</td>
+                                        <td class="text-end" style="font-family:var(--mono)">€@w.Revenue.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header fw-semibold">Last 12 months</div>
+                <div class="card-body p-0">
+                    @if (!Model.Last12Months.Any())
+                    {
+                        <p class="text-muted p-3 mb-0 small">No delivered orders yet.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Month</th>
+                                    <th class="text-end">Orders</th>
+                                    <th class="text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var m in Model.Last12Months)
+                                {
+                                    <tr>
+                                        <td>@m.Label</td>
+                                        <td class="text-end">@m.Orders</td>
+                                        <td class="text-end" style="font-family:var(--mono)">€@m.Revenue.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

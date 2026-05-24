@@ -1,0 +1,472 @@
+@page
+@model DashboardModel
+@using TippSendApp.Models
+@{
+    ViewData["Title"] = "Operator Dashboard";
+    Layout = null;
+    var hasSelection = Model.SelectedOrder is not null;
+    var prevDate = Model.ViewDate.AddDays(-1).ToString("yyyy-MM-dd");
+    var nextDate = Model.ViewDate.AddDays(1).ToString("yyyy-MM-dd");
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TippSend · Operator</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/brand.css" asp-append-version="true" />
+    <style>
+    html, body { height: 100%; margin: 0; background: #f5f3ee; }
+
+    /* ── Layout ── */
+    .op-layout {
+        display: grid;
+        grid-template-columns: 200px 1fr 360px;
+        height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .op-sidebar {
+        background: var(--gs-bog-deep);
+        color: var(--gs-cream);
+        display: flex;
+        flex-direction: column;
+        padding: 20px 16px;
+        overflow-y: auto;
+    }
+    .op-sidebar .brand {
+        font-family: var(--display);
+        font-size: 1.2rem;
+        color: var(--gs-gold);
+        margin-bottom: 24px;
+        display: block;
+    }
+    .op-sidebar .nav-link {
+        color: rgba(246,240,226,0.7);
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: .85rem;
+    }
+    .op-sidebar .nav-link:hover,
+    .op-sidebar .nav-link.active { color: var(--gs-cream); background: rgba(255,255,255,0.08); }
+    .stat-box { background: rgba(255,255,255,0.07); border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+    .stat-box .label { font-size: .7rem; color: var(--gs-fog); text-transform: uppercase; letter-spacing: .06em; }
+    .stat-box .value { font-size: 1.4rem; font-weight: 700; font-family: var(--mono); margin-top: 2px; }
+
+    /* ── Main panel ── */
+    .op-main { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: white; border-left: 1px solid #e8e3d8; }
+    .op-topbar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #e8e3d8; background: white; flex-shrink: 0; }
+    .op-filters { padding: 8px 16px; border-bottom: 1px solid #e8e3d8; display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; background: #faf8f4; }
+    .op-list { flex: 1; overflow-y: auto; }
+
+    .order-row {
+        display: grid;
+        grid-template-columns: 72px 1fr 60px 80px 70px;
+        gap: 8px;
+        align-items: center;
+        padding: 10px 16px;
+        border-bottom: 1px solid #f0ece3;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        transition: background .1s;
+    }
+    .order-row:hover { background: #faf8f4; }
+    .order-row.selected { background: #f0ede4; border-left: 3px solid var(--gs-gold); }
+    .order-row.header { background: #f5f3ee; cursor: default; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--gs-bog); }
+
+    .type-badge { font-size: .6rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+    .type-gift { background: #e8f4e8; color: #2d6a2d; }
+    .type-pd   { background: #e8eef8; color: #1a3a6a; }
+    .type-b2b  { background: #f8f0e8; color: #6a3a1a; }
+
+    /* ── Detail panel ── */
+    .op-detail { height: 100vh; overflow-y: auto; border-left: 1px solid #e8e3d8; background: white; padding: 20px; }
+    .detail-section { background: #faf8f4; border-radius: 8px; padding: 14px; margin-bottom: 14px; font-size: .85rem; }
+    .detail-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid #ede9df; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row .lbl { color: var(--gs-stone); font-size: .8rem; flex-shrink: 0; margin-right: 12px; }
+    .detail-row .val { text-align: right; font-size: .82rem; }
+
+    /* ── Mobile ── */
+    .op-mobile-bar { display: none; }
+    @@media (max-width: 1023px) {
+        html, body { overflow: auto; height: auto; }
+        .op-layout { display: block; height: auto; }
+        .op-sidebar { display: none; }
+        .op-main { height: auto; overflow: visible; border: none; }
+        .op-list { overflow: visible; }
+        .op-detail { height: auto; border: none; border-top: 2px solid #e8e3d8; padding: 16px; }
+        .op-mobile-bar { display: flex; align-items: center; gap: 10px; background: var(--gs-bog-deep); color: var(--gs-cream); padding: 10px 14px; position: sticky; top: 0; z-index: 40; }
+        .op-mobile-bar .brand { font-family: var(--display); font-size: 1rem; color: var(--gs-gold); }
+        .has-selection .op-main { display: none; }
+        .has-selection .op-detail { display: block; }
+        .order-row { grid-template-columns: 64px 1fr 56px 70px; }
+        .order-row .status-col { display: none; }
+        .order-row.header .status-col { display: none; }
+    }
+    @@media (min-width: 640px) and (max-width: 1023px) {
+        .op-layout { display: grid; grid-template-columns: 1fr 340px; }
+        .op-main { height: 100vh; overflow: hidden; }
+        .op-list { overflow-y: auto; }
+        .op-detail { height: 100vh; overflow-y: auto; }
+        .has-selection .op-main { display: flex; }
+    }
+    </style>
+</head>
+<body>
+
+<!-- Mobile top bar -->
+<div class="op-mobile-bar">
+    <button class="btn btn-sm p-1" style="color:var(--gs-cream);border:1px solid rgba(255,255,255,0.2)"
+            data-bs-toggle="offcanvas" data-bs-target="#sidebarDrawer">
+        <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M2.5 4a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0 4a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm0 4a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11z"/>
+        </svg>
+    </button>
+    <span class="brand">Tipp<em>Send</em></span>
+    @if (hasSelection)
+    {
+        <a asp-page="Dashboard" asp-route-FilterType="@Model.FilterType" asp-route-ViewDateStr="@Model.ViewDateStr"
+           class="ms-auto btn btn-sm" style="color:var(--gs-cream);border:1px solid rgba(255,255,255,0.2)">← Back</a>
+    }
+    else
+    {
+        <div class="ms-auto d-flex align-items-center gap-1">
+            <a asp-page="Dashboard" asp-route-ViewDateStr="@prevDate" asp-route-FilterType="@Model.FilterType"
+               class="btn btn-sm px-2" style="color:var(--gs-cream);border:1px solid rgba(255,255,255,0.2)">‹</a>
+            <span style="color:var(--gs-mist);font-size:.8rem;min-width:60px;text-align:center">@(Model.IsToday ? "Today" : Model.ViewDate.ToString("d MMM"))</span>
+            <a asp-page="Dashboard" asp-route-ViewDateStr="@nextDate" asp-route-FilterType="@Model.FilterType"
+               class="btn btn-sm px-2" style="color:var(--gs-cream);border:1px solid rgba(255,255,255,0.2)">›</a>
+        </div>
+    }
+</div>
+
+<!-- Sidebar offcanvas (mobile) -->
+<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="sidebarDrawer"
+     style="width:260px;background:var(--gs-bog-deep);color:var(--gs-cream)">
+    <div class="offcanvas-header border-bottom" style="border-color:rgba(255,255,255,0.1)!important">
+        <div style="font-family:var(--display);font-size:1.2rem;color:var(--gs-gold)">Tipp<em>Send</em></div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <nav class="nav flex-column gap-1 mb-4">
+            <a class="nav-link active" href="#">📋 Today's orders</a>
+            <a class="nav-link" asp-page="/Admin/Orders/Index">📦 All orders</a>
+            <a class="nav-link" asp-page="/Admin/Index">⚙️ Admin panel</a>
+            <a class="nav-link" asp-page="/Index" target="_blank">🌐 Public site</a>
+        </nav>
+        <hr style="border-color:rgba(255,255,255,0.12)">
+        <div class="stat-box">
+            <div class="label">Total</div><div class="value">@Model.TotalToday</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">Active</div><div class="value" style="color:#f0c040">@Model.ActiveToday</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">Delivered</div><div class="value" style="color:#5cb85c">@Model.DeliveredToday</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">Revenue</div><div class="value" style="color:var(--gs-gold)">€@Model.RevToday.ToString("F0")</div>
+        </div>
+        <div class="mt-3">
+            <a asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/Index"
+               class="btn btn-sm btn-outline-cream w-100">Sign out</a>
+        </div>
+    </div>
+</div>
+
+<!-- Main layout -->
+<div class="op-layout @(hasSelection ? "has-selection" : "")">
+
+    <!-- SIDEBAR -->
+    <div class="op-sidebar">
+        <a href="#" class="brand">Tipp<em>Send</em></a>
+
+        <nav class="nav flex-column gap-1 mb-4">
+            <a class="nav-link active" href="#">📋 Today's orders</a>
+            <a class="nav-link" asp-page="/Admin/Orders/Index">📦 All orders</a>
+            <a class="nav-link" asp-page="/Admin/Index">⚙️ Admin panel</a>
+            <a class="nav-link" asp-page="/Index" target="_blank">🌐 Public site</a>
+        </nav>
+
+        <hr style="border-color:rgba(255,255,255,0.12)">
+        <div class="mb-2" style="font-size:.68rem;color:var(--gs-fog);text-transform:uppercase;letter-spacing:.06em">
+            @(Model.IsToday ? "Today" : Model.ViewDate.ToString("d MMM yyyy"))
+        </div>
+
+        <div class="stat-box">
+            <div class="label">Total orders</div>
+            <div class="value">@Model.TotalToday</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">Active / pending</div>
+            <div class="value" style="color:#f0c040">@Model.ActiveToday</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">Delivered</div>
+            <div class="value" style="color:#5cb85c">@Model.DeliveredToday</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">Revenue</div>
+            <div class="value" style="color:var(--gs-gold)">€@Model.RevToday.ToString("F0")</div>
+        </div>
+
+        @if (Model.TotalToday > 15)
+        {
+            <div class="mt-2 p-2 rounded small" style="background:rgba(156,42,26,0.3);border:1px solid var(--gs-claret);color:var(--gs-cream)">
+                ⚠️ Over capacity (@Model.TotalToday / 15)
+            </div>
+        }
+
+        <div class="mt-auto pt-3">
+            <a asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/Index"
+               class="btn btn-sm btn-outline-cream w-100">Sign out</a>
+        </div>
+    </div>
+
+    <!-- MAIN PANEL -->
+    <div class="op-main">
+
+        <!-- Top bar with date nav -->
+        <div class="op-topbar">
+            <div class="d-flex align-items-center gap-1">
+                <a asp-page="Dashboard" asp-route-ViewDateStr="@prevDate" asp-route-FilterType="@Model.FilterType"
+                   class="btn btn-sm btn-outline-secondary px-2">‹</a>
+                <span class="fw-semibold" style="font-size:.9rem;min-width:110px;text-align:center">
+                    @(Model.IsToday ? "Today · " : "")@Model.ViewDate.ToString("d MMM")
+                </span>
+                <a asp-page="Dashboard" asp-route-ViewDateStr="@nextDate" asp-route-FilterType="@Model.FilterType"
+                   class="btn btn-sm btn-outline-secondary px-2">›</a>
+                @if (!Model.IsToday)
+                {
+                    <a asp-page="Dashboard" class="btn btn-sm btn-outline-secondary ms-1" style="font-size:.72rem">Today</a>
+                }
+            </div>
+            <div class="ms-auto d-flex gap-2 align-items-center">
+                <span class="badge bg-secondary">@Model.DeliveredToday / @Model.TotalToday done</span>
+                <a asp-page="/Book/Step1" class="btn btn-gold btn-sm">+ Gift order</a>
+            </div>
+        </div>
+
+        <!-- Service filter tabs -->
+        <div class="op-filters">
+            @foreach (var (label, val) in new[] { ("All", ""), ("Gift & Deliver", "Gift"), ("Pickup & Drop", "PickupDrop"), ("B2B", "B2B") })
+            {
+                <a asp-page="Dashboard" asp-route-FilterType="@val" asp-route-ViewDateStr="@Model.ViewDateStr"
+                   class="btn btn-sm @(Model.FilterType == val ? "btn-dark" : "btn-outline-secondary")">@label</a>
+            }
+        </div>
+
+        <!-- Order list -->
+        <div class="op-list">
+            <div class="order-row header">
+                <div>Time</div>
+                <div>Order</div>
+                <div>Type</div>
+                <div>Status</div>
+                <div class="status-col">Total</div>
+            </div>
+
+            @if (!Model.TodaysOrders.Any())
+            {
+                <div class="text-center text-muted p-5">
+                    No @(Model.FilterType switch { "Gift" => "Gift & Deliver", "PickupDrop" => "Pickup & Drop", "B2B" => "B2B", _ => "" }) orders for @(Model.IsToday ? "today" : Model.ViewDate.ToString("d MMM")).
+                </div>
+            }
+
+            @foreach (var order in Model.TodaysOrders)
+            {
+                <a asp-page="Dashboard" asp-route-SelectedOrderId="@order.Id"
+                   asp-route-FilterType="@Model.FilterType" asp-route-ViewDateStr="@Model.ViewDateStr"
+                   class="order-row @(Model.SelectedOrder?.Id == order.Id ? "selected" : "")">
+                    <div class="time-mono" style="font-size:.8rem">@order.WindowLabel.Split('–')[0]</div>
+                    <div>
+                        <div class="small fw-semibold text-truncate" style="max-width:160px">@order.ItemDescription</div>
+                        <div style="font-size:.7rem;color:var(--gs-stone)">
+                            @if (order.OrderType == OrderType.PickupDrop)
+                            {
+                                @order.ShopNameOverride
+                            }
+                            else
+                            {
+                                @(order.Shop?.Name ?? order.ShopNameOverride)
+                                <span>→ @order.RecipientTown</span>
+                            }
+                        </div>
+                    </div>
+                    <div>
+                        @if (order.OrderType == OrderType.PickupDrop)
+                        {
+                            <span class="type-badge type-pd">P&amp;D</span>
+                        }
+                        else if (order.B2BAccountId != null)
+                        {
+                            <span class="type-badge type-b2b">B2B</span>
+                        }
+                        else
+                        {
+                            <span class="type-badge type-gift">Gift</span>
+                        }
+                    </div>
+                    <div><span class="badge @order.StatusBadgeClass" style="font-size:.65rem">@order.Status</span></div>
+                    <div class="time-mono status-col" style="font-size:.8rem">€@order.Total.ToString("F0")</div>
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="op-detail">
+        @if (Model.SelectedOrder is null)
+        {
+            <div class="text-center text-muted mt-5">
+                <div style="font-size:2rem">📋</div>
+                <p class="mt-2">Select an order to see details</p>
+            </div>
+        }
+        else
+        {
+            var o = Model.SelectedOrder;
+            var isPickupDrop = o.OrderType == OrderType.PickupDrop;
+
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex gap-2 align-items-center">
+                    @if (isPickupDrop)
+                    {
+                        <span class="type-badge type-pd" style="font-size:.72rem;padding:3px 8px">Pickup & Drop</span>
+                    }
+                    else if (o.B2BAccountId != null)
+                    {
+                        <span class="type-badge type-b2b" style="font-size:.72rem;padding:3px 8px">B2B — @o.B2BAccount?.BusinessName</span>
+                    }
+                    else
+                    {
+                        <span class="type-badge type-gift" style="font-size:.72rem;padding:3px 8px">Gift & Deliver</span>
+                    }
+                    <span class="badge @o.StatusBadgeClass">@o.Status</span>
+                </div>
+                <a asp-page="/Track/Index" asp-route-token="@o.TrackingToken" target="_blank"
+                   class="btn btn-outline-secondary btn-sm">Track →</a>
+            </div>
+
+            <h6 class="mb-1" style="font-family:'Newsreader',Georgia,serif">@o.ItemDescription</h6>
+            <div class="text-muted small mb-3">@o.Reference</div>
+
+            @if (isPickupDrop)
+            {
+                <!-- Pickup & Drop detail -->
+                <div class="detail-section">
+                    <div class="detail-row">
+                        <span class="lbl">📅 Date</span>
+                        <span class="val">@o.DeliveryDate.ToString("ddd d MMM") · @o.WindowLabel.Split('–')[0]</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="lbl">📦 Pick up from</span>
+                        <span class="val">@o.ShopNameOverride</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="lbl">📍 Drop off to</span>
+                        <span class="val">@o.RecipientAddress</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="lbl">👤 Contact</span>
+                        <span class="val">@o.SenderName</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="lbl">📞 Phone</span>
+                        <span class="val">@o.SenderPhone</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="lbl">💶 Total paid</span>
+                        <span class="val fw-bold" style="color:var(--gs-gold);font-family:var(--mono)">€@o.Total.ToString("F2")</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Gift & Deliver detail -->
+                <div class="detail-section">
+                    <div class="detail-row">
+                        <span class="lbl">📅 Window</span>
+                        <span class="val">@o.DeliveryDate.ToString("ddd d MMM") · @o.WindowLabel</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="lbl">🏪 Shop</span>
+                        <span class="val">@(o.Shop?.Name ?? o.ShopNameOverride) @(o.Shop != null ? $"· {o.Shop.OpeningHours}" : "")</span>
+                    </div>
+                    @if (o.Shop?.PaymentNotes != null)
+                    {
+                        <div class="detail-row">
+                            <span class="lbl">💳 Payment</span>
+                            <span class="val">@o.Shop.PaymentNotes</span>
+                        </div>
+                    }
+                    <div class="detail-row">
+                        <span class="lbl">📍 Deliver to</span>
+                        <span class="val">@o.RecipientAddress, @o.RecipientTown</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="lbl">👤 Recipient</span>
+                        <span class="val">@o.RecipientName · @o.RecipientPhone</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="lbl">💶 Total paid</span>
+                        <span class="val fw-bold" style="color:var(--gs-gold);font-family:var(--mono)">€@o.Total.ToString("F2")</span>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(o.CardMessage))
+                {
+                    <div class="mb-3 p-3 rounded" style="background:#fffef9;border:1px solid var(--gs-fog);font-family:Georgia,serif;font-style:italic;font-size:.88rem">
+                        "@o.CardMessage"
+                    </div>
+                }
+            }
+
+            @if (o.DeliveryPhotoPath != null)
+            {
+                <div class="mb-3">
+                    <img src="@o.DeliveryPhotoPath" class="img-fluid rounded w-100" alt="Delivery photo" />
+                </div>
+            }
+
+            <!-- Update form -->
+            <form method="post" asp-page-handler="UpdateStatus" asp-route-orderId="@o.Id" enctype="multipart/form-data">
+                <input type="hidden" name="FilterType" value="@Model.FilterType" />
+                <input type="hidden" name="ViewDateStr" value="@Model.ViewDateStr" />
+
+                <div class="mb-2">
+                    <label class="form-label small fw-semibold mb-1">Update status</label>
+                    <select name="NewStatus" class="form-select form-select-sm">
+                        @foreach (var status in Enum.GetValues<OrderStatus>())
+                        {
+                            if (o.Status == status) { <option value="@status" selected>@status</option> }
+                            else { <option value="@status">@status</option> }
+                        }
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small fw-semibold mb-1">Notes</label>
+                    <input type="text" name="DriverNotes" class="form-control form-control-sm" value="@o.DriverNotes" placeholder="Optional" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small fw-semibold mb-1">Delivery photo</label>
+                    <input type="file" name="DeliveryPhoto" class="form-control form-control-sm" accept="image/*" />
+                </div>
+                <button type="submit" class="btn btn-gold w-100 mb-2">Save update</button>
+                <a href="https://wa.me/@(o.SenderPhone.Replace("+","").Replace(" ",""))?text=Hi+@Uri.EscapeDataString(o.SenderName),+your+TippSend+order+@Uri.EscapeDataString(o.Reference)+update."
+                   target="_blank" class="btn w-100" style="background:#25D366;color:white;font-size:.85rem">
+                    💬 WhatsApp @(isPickupDrop ? "customer" : "sender")
+                </a>
+            </form>
+        }
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

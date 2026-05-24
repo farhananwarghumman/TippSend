@@ -1,0 +1,125 @@
+@page "/mothers-day"
+@model TippSendApp.Pages.MothersDayPage.IndexModel
+@{
+    ViewData["Title"] = "Mother's Day Gifts Delivered in South Tipperary — TippSend";
+    var targetIso = Model.TargetDate.ToString("yyyy-MM-ddT10:00:00");
+    var targetDisplay = Model.TargetDate.ToString("dddd d MMMM yyyy");
+}
+
+@section Styles {
+<style>
+body { background: var(--gs-cream); }
+.season-hero {
+    background: linear-gradient(135deg, #2d1b2e 0%, #1F3A2E 60%);
+    padding: 72px 0 56px; position: relative; overflow: hidden;
+}
+.season-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 40%, rgba(201,162,75,0.18) 0%, transparent 55%);
+    pointer-events: none;
+}
+.season-hero-inner { position: relative; z-index: 2; }
+.season-eyebrow { font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gs-gold);margin-bottom:20px; }
+.season-h1 { font-family:var(--display);font-weight:400;font-size:clamp(34px,5vw,60px);line-height:1.08;letter-spacing:-.02em;color:var(--gs-cream);margin-bottom:18px; }
+.season-h1 em { font-style:italic;color:var(--gs-gold); }
+.season-sub { font-size:clamp(15px,1.8vw,18px);color:var(--gs-fog);line-height:1.65;margin-bottom:36px;max-width:540px; }
+.countdown-strip {
+    display:inline-flex;gap:16px;align-items:center;flex-wrap:wrap;
+    background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+    border-radius:var(--r-md);padding:16px 24px;margin-bottom:36px;
+    max-width:100%;
+}
+@@media(max-width:480px){.countdown-sep{display:none;}.countdown-strip{gap:12px;padding:14px 16px;}}
+.countdown-unit { text-align:center; }
+.countdown-num { font-family:var(--mono);font-size:36px;font-weight:700;color:var(--gs-gold);line-height:1; }
+.countdown-lbl { font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gs-fog);margin-top:4px; }
+.countdown-sep { font-size:28px;color:rgba(255,255,255,0.3);align-self:center;margin-top:-6px; }
+.gift-row { display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:32px; }
+.gift-card { background:white;border:1px solid var(--gs-mist);border-radius:var(--r-md);overflow:hidden;transition:box-shadow .2s; }
+.gift-card:hover { box-shadow:var(--shadow-2); }
+.gift-card img { width:100%;height:160px;object-fit:cover; }
+.gift-card-body { padding:16px; }
+.gift-card-name { font-weight:600;font-size:14px;margin-bottom:4px;color:var(--gs-bog-deep); }
+.gift-card-shop { font-size:11px;color:var(--gs-stone);margin-bottom:8px; }
+.gift-card-price { font-family:var(--mono);font-size:15px;font-weight:700;color:var(--gs-bog-deep); }
+</style>
+}
+
+<section class="season-hero">
+    <div class="container season-hero-inner">
+        <div class="season-eyebrow">Mother's Day · @Model.TargetDate.ToString("d MMMM yyyy")</div>
+        <h1 class="season-h1">Give Mum something<br><em>she'll never forget.</em></h1>
+        <p class="season-sub">Fresh flowers, chocolates and local gifts — collected from the best shops in South Tipperary and delivered to her door with a handwritten card.</p>
+        <div class="countdown-strip" data-anim id="countdown" data-target="@targetIso">
+            <div class="countdown-unit"><div class="countdown-num" id="cd-days">--</div><div class="countdown-lbl">Days</div></div>
+            <div class="countdown-sep">:</div>
+            <div class="countdown-unit"><div class="countdown-num" id="cd-hours">--</div><div class="countdown-lbl">Hours</div></div>
+            <div class="countdown-sep">:</div>
+            <div class="countdown-unit"><div class="countdown-num" id="cd-mins">--</div><div class="countdown-lbl">Mins</div></div>
+            <div class="countdown-sep">:</div>
+            <div class="countdown-unit"><div class="countdown-num" id="cd-secs">--</div><div class="countdown-lbl">Secs</div></div>
+        </div>
+        <div class="d-flex gap-3 flex-wrap" data-anim>
+            <a href="/gift" class="btn btn-gold" style="font-size:16px;padding:14px 28px">Choose a Mother's Day gift →</a>
+            <a href="https://wa.me/353899258702?text=Hi%2C%20I%27d%20like%20to%20send%20a%20Mother%27s%20Day%20gift." target="_blank" rel="noopener"
+               class="btn d-flex align-items-center gap-2"
+               style="background:#25D366;color:#fff;font-size:15px;padding:14px 22px;border:none">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                WhatsApp us
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="py-5" style="background:var(--gs-cream)">
+    <div class="container" style="max-width:940px">
+        <h2 class="text-center mb-4" style="font-family:var(--display);font-weight:400;font-size:clamp(24px,3vw,36px);color:var(--gs-bog-deep)">
+            Perfect for Mum
+        </h2>
+        <div class="gift-row">
+            <div class="gift-card"><img src="/images/product-bouquet.jpg" alt="Wildflower bouquet" onerror="this.style.display='none'"><div class="gift-card-body"><div class="gift-card-name">Seasonal Wildflower Bouquet</div><div class="gift-card-shop">Blooming Thing Floristry, Clonmel</div><div class="gift-card-price">€45 <span style="font-size:12px;font-weight:400;color:var(--gs-stone)">+ €6 delivery</span></div></div></div>
+            <div class="gift-card"><img src="/images/product-roses.jpg" alt="Red roses" onerror="this.style.display='none'"><div class="gift-card-body"><div class="gift-card-name">Anniversary Red Roses (12 Stems)</div><div class="gift-card-shop">Blooming Thing Floristry, Clonmel</div><div class="gift-card-price">€55 <span style="font-size:12px;font-weight:400;color:var(--gs-stone)">+ €6 delivery</span></div></div></div>
+            <div class="gift-card"><img src="/images/product-candle.jpg" alt="Soy candle" onerror="this.style.display='none'"><div class="gift-card-body"><div class="gift-card-name">Luxury Scented Soy Candle</div><div class="gift-card-shop">The Spa Room, Clonmel</div><div class="gift-card-price">€38 <span style="font-size:12px;font-weight:400;color:var(--gs-stone)">+ €6 delivery</span></div></div></div>
+            <div class="gift-card"><img src="/images/product-champagne.jpg" alt="Champagne" onerror="this.style.display='none'"><div class="gift-card-body"><div class="gift-card-name">Champagne &amp; Chocolates</div><div class="gift-card-shop">Lonergan's Off Licence, Clonmel</div><div class="gift-card-price">€58 <span style="font-size:12px;font-weight:400;color:var(--gs-stone)">+ €6 delivery</span></div></div></div>
+        </div>
+        <div class="text-center mt-4">
+            <a href="/gift" class="btn btn-gold" style="font-size:15px;padding:12px 28px">See all 22 gifts →</a>
+        </div>
+    </div>
+</section>
+
+<section class="py-5" style="background:var(--gs-bog-deep);text-align:center">
+    <div class="container" style="max-width:520px">
+        <div style="font-size:32px;margin-bottom:16px">✉️</div>
+        <h3 style="font-family:var(--display);font-weight:400;color:var(--gs-cream);margin-bottom:12px">Free handwritten card with every gift</h3>
+        <p style="color:var(--gs-fog);margin-bottom:28px">Write your message at checkout. We print it in our own hand and tuck it in with the gift.</p>
+        <a href="/gift" class="btn btn-gold" style="font-size:15px;padding:12px 28px">Order for Mother's Day →</a>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+(function() {
+    var target = new Date('@targetIso').getTime();
+    function tick() {
+        var now  = Date.now();
+        var diff = target - now;
+        if (diff <= 0) {
+            document.getElementById('countdown').innerHTML = '<span style="color:var(--gs-gold);font-size:18px;font-weight:600">Happy Mother\'s Day! 🌸</span>';
+            return;
+        }
+        var d = Math.floor(diff / 86400000);
+        var h = Math.floor((diff % 86400000) / 3600000);
+        var m = Math.floor((diff % 3600000) / 60000);
+        var s = Math.floor((diff % 60000) / 1000);
+        document.getElementById('cd-days').textContent  = String(d).padStart(2,'0');
+        document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
+        document.getElementById('cd-mins').textContent  = String(m).padStart(2,'0');
+        document.getElementById('cd-secs').textContent  = String(s).padStart(2,'0');
+    }
+    tick();
+    setInterval(tick, 1000);
+})();
+</script>
+}

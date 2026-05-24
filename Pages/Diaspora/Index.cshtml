@@ -1,0 +1,181 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Send a gift from abroad";
+}
+
+<!-- HERO -->
+<section class="diaspora-hero">
+    <div class="container-xl">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <h1 style="color:var(--gs-cream)">You're in London.<br>She's in Clonmel.<br>We're around the corner.</h1>
+                <p class="lead mb-4" style="color:var(--gs-fog)">Send something specific from a real local shop — flowers from the florist she always loved, a cake from the bakery downtown — at the exact moment you want it to arrive.</p>
+                <a asp-page="/Book/Step1" class="btn btn-gold btn-lg px-5">Send a gift from abroad</a>
+            </div>
+            <div class="col-lg-5 offset-lg-1">
+                <!-- Time zone converter -->
+                <div class="tz-converter">
+                    <div class="fw-semibold mb-3" style="color:var(--gs-gold)">Time zone helper</div>
+                    <p class="small mb-3" style="color:var(--gs-fog)">Enter the IST time you want delivery — see your local equivalent.</p>
+                    <div class="mb-3">
+                        <label class="form-label small" style="color:var(--gs-fog)">Irish delivery time (IST)</label>
+                        <input type="time" id="istTime" class="form-control" value="19:00" style="max-width:160px;background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);color:white" />
+                    </div>
+                    <div id="tzRows">
+                        <div class="tz-row">
+                            <span>🇮🇪 Ireland (IST)</span>
+                            <span class="fw-bold" id="ist-display">19:00</span>
+                        </div>
+                        <div class="tz-row">
+                            <span>🇬🇧 London (GMT/BST)</span>
+                            <span class="fw-bold" id="gb-display">18:00</span>
+                        </div>
+                        <div class="tz-row">
+                            <span>🇺🇸 New York (EDT/EST)</span>
+                            <span class="fw-bold" id="us-display">14:00</span>
+                        </div>
+                        <div class="tz-row">
+                            <span>🇦🇺 Sydney (AEST/AEDT)</span>
+                            <span class="fw-bold" id="au-display">05:00 +1</span>
+                        </div>
+                        <div class="tz-row">
+                            <span>🇦🇪 Dubai (GST)</span>
+                            <span class="fw-bold" id="ae-display">22:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MOST-SENT GIFTS -->
+<section class="py-5" style="background:white">
+    <div class="container-xl">
+        <h2 class="text-center mb-2">Most-sent gifts</h2>
+        <p class="text-center text-muted mb-5">Real local shops, not generic hampers.</p>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="gift-card">
+                    <div style="height:140px;background:linear-gradient(135deg,#d4edda,#a8d5b0);display:flex;align-items:center;justify-content:center;font-size:3.5rem">🌷</div>
+                    <div class="p-3">
+                        <div class="fw-semibold">Mother's Day flowers</div>
+                        <div class="text-muted small">Blooming Thing Floristry, Clonmel</div>
+                        <div class="mt-2 fw-bold" style="color:var(--gs-bog)">From €18 + delivery</div>
+                        <a asp-page="/Book/Step1" class="btn btn-gold btn-sm mt-2 w-100">Send this</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="gift-card">
+                    <div style="height:140px;background:linear-gradient(135deg,#fde8d8,#f7c09f);display:flex;align-items:center;justify-content:center;font-size:3.5rem">🎂</div>
+                    <div class="p-3">
+                        <div class="fw-semibold">Birthday cake</div>
+                        <div class="text-muted small">Hickeys Bakery, Clonmel</div>
+                        <div class="mt-2 fw-bold" style="color:var(--gs-bog)">From €22 + delivery</div>
+                        <a asp-page="/Book/Step1" class="btn btn-gold btn-sm mt-2 w-100">Send this</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="gift-card">
+                    <div style="height:140px;background:linear-gradient(135deg,#d4c5a9,#c9b078);display:flex;align-items:center;justify-content:center;font-size:3.5rem">🥃</div>
+                    <div class="p-3">
+                        <div class="fw-semibold">Premium whisky / wine</div>
+                        <div class="text-muted small">Lonergan's Off Licence, Clonmel</div>
+                        <div class="mt-2 fw-bold" style="color:var(--gs-bog)">From €30 + delivery</div>
+                        <a asp-page="/Book/Step1" class="btn btn-gold btn-sm mt-2 w-100">Send this</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="gift-card">
+                    <div style="height:140px;background:linear-gradient(135deg,#e8f4e8,#b8ddb8);display:flex;align-items:center;justify-content:center;font-size:3.5rem">🧺</div>
+                    <div class="p-3">
+                        <div class="fw-semibold">Christmas hamper</div>
+                        <div class="text-muted small">Curated locally</div>
+                        <div class="mt-2 fw-bold" style="color:var(--gs-bog)">From €55 + delivery</div>
+                        <a asp-page="/Book/Step1" class="btn btn-gold btn-sm mt-2 w-100">Send this</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="gift-card">
+                    <div style="height:140px;background:linear-gradient(135deg,#fce4ec,#f48fb1);display:flex;align-items:center;justify-content:center;font-size:3.5rem">💍</div>
+                    <div class="p-3">
+                        <div class="fw-semibold">Anniversary surprise</div>
+                        <div class="text-muted small">We curate the perfect local gift</div>
+                        <div class="mt-2 fw-bold" style="color:var(--gs-bog)">From €40 + delivery</div>
+                        <a asp-page="/Book/Step1" class="btn btn-gold btn-sm mt-2 w-100">Send this</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="gift-card">
+                    <div style="height:140px;background:linear-gradient(135deg,#e8eaf6,#9fa8da);display:flex;align-items:center;justify-content:center;font-size:3.5rem">✉️</div>
+                    <div class="p-3">
+                        <div class="fw-semibold">Handwritten card only</div>
+                        <div class="text-muted small">Hand-printed, cream card, twine</div>
+                        <div class="mt-2 fw-bold" style="color:var(--gs-bog)">Free with any order</div>
+                        <a asp-page="/Book/Step1" class="btn btn-gold btn-sm mt-2 w-100">Add to any order</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="py-5" style="background:var(--gs-paper)">
+    <div class="container-xl">
+        <div style="max-width:640px;margin:0 auto;text-align:center">
+            <div style="font-size:3rem;margin-bottom:1rem">★★★★★</div>
+            <blockquote class="mb-4" style="font-family:'Newsreader',serif;font-size:1.2rem;font-style:italic;color:var(--gs-bog)">
+                "I'm in Perth and I've been trying to send Mam something from Hickeys for her 70th for years. TippSend sorted it in ten minutes — she had her cake at exactly 3pm Dublin time, and I got a photo the second it arrived. I cried."
+            </blockquote>
+            <div class="fw-semibold">Siobhán O'Brien</div>
+            <div class="text-muted small">Perth, Australia · Sending to Carrick-on-Suir</div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER BAND -->
+<section class="py-4 text-center" style="background:var(--gs-bog);color:var(--gs-cream)">
+    <div class="container-xl">
+        <p class="mb-3" style="color:var(--gs-fog)">Diaspora-rate Stripe checkout · Pay in £ $ €</p>
+        <a asp-page="/Book/Step1" class="btn btn-gold btn-lg px-5">Send a gift from abroad</a>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+(function() {
+    var offsets = { gb: -1, us: -5, au: 10, ae: 3 };
+    var el = document.getElementById('istTime');
+
+    function update() {
+        var parts = el.value.split(':');
+        var h = parseInt(parts[0]), m = parseInt(parts[1]);
+        document.getElementById('ist-display').textContent = fmt(h, m);
+        document.getElementById('gb-display').textContent = fmtOff(h, m, offsets.gb);
+        document.getElementById('us-display').textContent = fmtOff(h, m, offsets.us);
+        document.getElementById('au-display').textContent = fmtOff(h, m, offsets.au);
+        document.getElementById('ae-display').textContent = fmtOff(h, m, offsets.ae);
+    }
+
+    function fmt(h, m) { return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0'); }
+
+    function fmtOff(h, m, off) {
+        var nh = h + off;
+        var day = '';
+        if (nh < 0) { nh += 24; day = ' -1 day'; }
+        if (nh >= 24) { nh -= 24; day = ' +1 day'; }
+        return fmt(nh, m) + day;
+    }
+
+    el.addEventListener('input', update);
+    update();
+})();
+</script>
+}

@@ -1,0 +1,896 @@
+@page "/send"
+@model IndexModel
+@{
+    ViewData["Title"] = "Pickup & Drop — Collect it. Deliver it. Done.";
+}
+
+@section Styles {
+<style>
+body { background: var(--gs-cream); }
+
+/* ── Hero ── */
+.send-hero {
+    background: var(--gs-cream);
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+}
+.send-hero-inner {
+    position: relative;
+    min-height: 460px;
+    display: flex;
+    align-items: center;
+    padding: 72px 0;
+}
+.send-hero-text { position: relative; z-index: 2; flex: 1; }
+.send-hero-photo {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 44%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    padding: 32px;
+}
+/* Tablet: keep inline but smaller clock */
+@@media (max-width: 900px) {
+    .send-hero-inner { min-height: auto; padding: 48px 0; }
+    .send-hero-photo { width: 38%; padding: 16px; }
+    .send-hero-photo svg { width: 180px !important; height: 180px !important; }
+}
+/* Mobile: stack layout, hide clock to avoid overflow */
+@@media (max-width: 640px) {
+    .send-hero-inner { display: block; padding: 40px 0 24px; }
+    .send-hero-photo { display: none; }
+}
+
+/* ── Stats bar ── */
+.send-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--gs-bog-deep);
+}
+@@media (max-width: 640px) { .send-stats { grid-template-columns: repeat(2, 1fr); } }
+.send-stat {
+    padding: 24px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    border-right: 1px solid rgba(255,255,255,0.07);
+}
+.send-stat:last-child { border-right: none; }
+.send-stat__icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.send-stat__val {
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+}
+.send-stat__lbl { font-size: 11px; color: var(--gs-fog); line-height: 1.4; margin: 0; }
+
+/* ── Use-cases ── */
+.usecase-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+@@media (max-width: 768px) { .usecase-grid { grid-template-columns: 1fr 1fr; } }
+@@media (max-width: 420px)  { .usecase-grid { grid-template-columns: 1fr; } }
+.usecase-item {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-md);
+    padding: 16px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gs-bog-deep);
+}
+.usecase-item span:first-child { font-size: 22px; flex-shrink: 0; }
+
+/* ── How it works ── */
+.hiw-send-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+@@media (max-width: 768px) { .hiw-send-grid { grid-template-columns: 1fr; gap: 16px; } }
+.hiw-send-card {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    padding: 28px 24px;
+    position: relative;
+}
+.hiw-send-num {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--gs-gold);
+    color: var(--gs-bog-deep);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 14px; font-weight: 700;
+    margin-bottom: 16px;
+}
+.hiw-send-card h3 { font-size: 16px; font-weight: 600; color: var(--gs-bog-deep); margin-bottom: 6px; }
+.hiw-send-card p  { font-size: 13px; color: var(--gs-stone); line-height: 1.5; margin: 0; }
+
+/* ── Form layout ── */
+.send-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+    align-items: start;
+}
+@@media (max-width: 992px) { .send-layout { grid-template-columns: 1fr; } }
+
+.send-form {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+}
+.send-form-header {
+    background: var(--gs-bog-deep);
+    padding: 22px 28px;
+}
+.send-form-header h3 { color: var(--gs-cream); font-size: 18px; font-weight: 500; margin: 0 0 4px; letter-spacing: -0.01em; }
+.send-form-header p  { color: var(--gs-fog); font-size: 13px; margin: 0; }
+.send-form-body { padding: 28px; }
+@@media (max-width: 600px) { .send-form-body { padding: 20px; } }
+
+.send-form .form-label { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: var(--gs-bog-deep); margin-bottom: 6px; text-transform: uppercase; }
+.send-form .form-control,
+.send-form .form-select,
+.send-form input[type="date"],
+.send-form input[type="time"] {
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-sm);
+    font-size: 14px;
+    padding: 10px 14px;
+    background: var(--gs-cream);
+    color: var(--gs-ink);
+    width: 100%;
+    font-family: var(--sans);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    -webkit-appearance: none; appearance: none;
+    box-sizing: border-box;
+}
+.send-form .form-control:focus,
+.send-form .form-select:focus,
+.send-form input[type="date"]:focus,
+.send-form input[type="time"]:focus {
+    border-color: var(--gs-gold);
+    box-shadow: 0 0 0 3px rgba(201,162,75,0.14);
+    outline: none;
+    background: white;
+}
+.send-form input[type="date"]::-webkit-calendar-picker-indicator,
+.send-form input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer; opacity: 0.5;
+    filter: invert(40%) sepia(30%) saturate(400%) hue-rotate(10deg);
+}
+.send-form .text-danger { font-size: 12px; }
+
+.send-section-label {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--gs-gold-deep);
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--gs-mist);
+}
+
+/* ── Sidebar ── */
+.send-sidebar { position: sticky; top: 24px; }
+
+.price-card {
+    background: var(--gs-bog-deep);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+.price-card-head {
+    padding: 20px 22px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.price-card-head__label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gs-gold-soft); margin-bottom: 8px; }
+.price-card-head__amount { font-family: var(--mono); font-size: 48px; font-weight: 500; color: var(--gs-gold); letter-spacing: -0.04em; line-height: 1; }
+.price-card-head__note { font-size: 12px; color: var(--gs-fog); margin-top: 6px; min-height: 16px; }
+.price-card-body { padding: 16px 22px 20px; }
+.price-card-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--gs-fog);
+}
+.price-card-row:last-child { border-bottom: none; }
+.price-card-row span:last-child { font-weight: 600; color: var(--gs-cream); font-family: var(--mono); }
+
+.zone-ref-card {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    padding: 18px 20px;
+    font-size: 13px;
+}
+.zone-ref-card h4 { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gs-bog-deep); margin-bottom: 12px; }
+.zone-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: flex-start; }
+.zone-row:last-child { margin-bottom: 0; }
+.zone-badge { font-size: 11px; font-weight: 700; background: var(--gs-bog-deep); color: var(--gs-cream); border-radius: 4px; padding: 2px 7px; flex-shrink: 0; margin-top: 1px; }
+.zone-badge.b { background: var(--gs-gold); color: var(--gs-bog-deep); }
+.zone-badge.c { background: var(--gs-stone); }
+.zone-row p { font-size: 12px; color: var(--gs-stone); margin: 0; line-height: 1.4; }
+
+/* ── Pricing table ── */
+.pickup-price-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.pickup-price-table th {
+    background: rgba(255,255,255,0.05);
+    color: var(--gs-gold-soft);
+    padding: 12px 16px; font-weight: 600; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.pickup-price-table td { padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); color: var(--gs-fog); }
+.pickup-price-table tr:last-child td { border-bottom: none; }
+.pickup-price-table td:first-child { color: var(--gs-cream); font-weight: 600; }
+.pickup-price-table td:last-child { font-family: var(--mono); font-weight: 600; color: var(--gs-gold); }
+</style>
+}
+
+<!-- ═══ HERO ═══════════════════════════════════════════════════════ -->
+<div class="send-hero">
+    <div class="send-hero-inner">
+        <div class="container-xl" style="width:100%">
+            <div class="send-hero-text" data-anim>
+                <div class="hero-badge" style="display:inline-flex;align-items:center;border:1.5px solid rgba(31,58,46,0.3);border-radius:var(--r-pill);padding:6px 18px;font-size:11px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--gs-bog-deep);margin-bottom:20px">Pickup &amp; Drop</div>
+                <h1 data-anim style="--anim-delay:0.08s;font-family:var(--display);font-weight:400;font-size:clamp(40px,5.5vw,70px);line-height:1.05;letter-spacing:-0.03em;color:var(--gs-bog-deep);margin:0 0 18px">
+                    Collect it. Deliver it.<br>
+                    <em style="font-style:italic;color:var(--gs-bog)">Done.</em>
+                </h1>
+                <p data-anim style="--anim-delay:0.14s;max-width:420px;color:var(--gs-stone);font-size:16px;line-height:1.65;margin-bottom:32px">
+                    Any item. Any two addresses across Clonmel and South Tipperary's main towns. See your price instantly and pay online.
+                </p>
+                <a href="#book" class="btn btn-gold" style="font-size:15px;padding:13px 28px" data-anim style="--anim-delay:0.18s">Book a pickup →</a>
+
+                <!-- What we carry -->
+                <div data-anim style="--anim-delay:0.22s;margin-top:36px">
+                    <p style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gs-stone);margin-bottom:12px">If it fits in a car, we'll move it</p>
+                    <div class="usecase-grid" style="max-width:560px">
+                        <div class="usecase-item"><span>📦</span> Parcels &amp; packages</div>
+                        <div class="usecase-item"><span>🤝</span> Facebook Marketplace</div>
+                        <div class="usecase-item"><span>🍞</span> Home bakers &amp; food</div>
+                        <div class="usecase-item"><span>💊</span> Prescriptions</div>
+                        <div class="usecase-item"><span>📋</span> Documents</div>
+                        <div class="usecase-item"><span>🎁</span> Homemade gifts</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time dial — right side -->
+        <div class="send-hero-photo" aria-hidden="true" style="display:flex;align-items:center;justify-content:center;background:var(--gs-cream)">
+            @{
+                // 18:00 with ±5 min Exact Moment window
+                double cx2 = 100, cy2 = 100, ringR = 78;
+                double hourOnDial = 6.0; // 18 % 12 = 6
+                double handAngleDeg = (hourOnDial / 12.0) * 360.0 - 90.0; // 90°
+                double precMin = 5.0;
+                double windowSweep = (precMin / 60.0) * 360.0 * 2.0; // 60°
+                double arcCenter = handAngleDeg;
+                double arcStart = arcCenter - windowSweep / 2.0; // 60°
+                double arcEnd   = arcCenter + windowSweep / 2.0; // 120°
+                double ToRad(double d) => d * Math.PI / 180.0;
+                double sx = cx2 + Math.Cos(ToRad(arcStart)) * ringR; // 139
+                double sy = cy2 + Math.Sin(ToRad(arcStart)) * ringR; // 167.5
+                double ex = cx2 + Math.Cos(ToRad(arcEnd))   * ringR; // 61
+                double ey = cy2 + Math.Sin(ToRad(arcEnd))   * ringR; // 167.5
+                int largeArc = windowSweep > 180 ? 1 : 0;
+                double hx = cx2 + Math.Cos(ToRad(handAngleDeg)) * 56; // 100
+                double hy = cy2 + Math.Sin(ToRad(handAngleDeg)) * 56; // 156
+            }
+            <svg viewBox="0 0 200 200" width="300" height="300" xmlns="http://www.w3.org/2000/svg" style="max-width:90%;flex-shrink:0">
+                <defs>
+                    <radialGradient id="dialBg2" cx="50%" cy="40%" r="70%">
+                        <stop offset="0%" stop-color="#FAF6EC"/>
+                        <stop offset="100%" stop-color="#EDE6D4"/>
+                    </radialGradient>
+                    <filter id="dialShadow">
+                        <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(20,39,31,0.14)"/>
+                    </filter>
+                </defs>
+                <!-- Face -->
+                <circle cx="100" cy="100" r="88" fill="url(#dialBg2)" stroke="#1F3A2E" stroke-width="1.5" filter="url(#dialShadow)"/>
+                <!-- Gold window arc -->
+                <path d="M @sx.ToString("F1") @sy.ToString("F1") A @ringR @ringR 0 @largeArc 1 @ex.ToString("F1") @ey.ToString("F1")"
+                      fill="none" stroke="#C9A24B" stroke-width="6" stroke-linecap="round" opacity="0.9"/>
+                <!-- Ticks -->
+                @for (int i = 0; i < 60; i++) {
+                    double a = (i / 60.0) * 360.0 - 90.0;
+                    bool isHr = i % 5 == 0;
+                    double r1 = isHr ? 72 : 75, r2 = isHr ? 80 : 78;
+                    double tx1 = 100 + Math.Cos(a * Math.PI / 180.0) * r1;
+                    double ty1 = 100 + Math.Sin(a * Math.PI / 180.0) * r1;
+                    double tx2 = 100 + Math.Cos(a * Math.PI / 180.0) * r2;
+                    double ty2 = 100 + Math.Sin(a * Math.PI / 180.0) * r2;
+                    <line x1="@tx1.ToString("F2")" y1="@ty1.ToString("F2")"
+                          x2="@tx2.ToString("F2")" y2="@ty2.ToString("F2")"
+                          stroke="@(isHr ? "#1F3A2E" : "#D4CBBC")"
+                          stroke-width="@(isHr ? "1.5" : "0.8")"
+                          stroke-linecap="round"/>
+                }
+                <!-- Numerals -->
+                <text x="100" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="500" fill="#1F3A2E">12</text>
+                <text x="158" y="104" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="500" fill="#1F3A2E">3</text>
+                <text x="100" y="162" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="500" fill="#1F3A2E">6</text>
+                <text x="42" y="104" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="500" fill="#1F3A2E">9</text>
+                <!-- Hand -->
+                <line x1="100" y1="100" x2="@hx.ToString("F1")" y2="@hy.ToString("F1")"
+                      stroke="#1F3A2E" stroke-width="2.4" stroke-linecap="round"/>
+                <!-- Short minute hand (pointing to 00 = 12 o'clock) -->
+                <line x1="100" y1="100" x2="100" y2="56"
+                      stroke="#1F3A2E" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+                <!-- Centre dot -->
+                <circle cx="100" cy="100" r="3.6" fill="#C9A24B"/>
+                <circle cx="100" cy="100" r="1.5" fill="#14271F"/>
+                <!-- Label -->
+                <text x="100" y="128" text-anchor="middle" font-family="sans-serif" font-size="5.8"
+                      letter-spacing="1.8" font-weight="700" fill="#7A6B5A">EXACT MOMENT</text>
+                <!-- ±5 min badge -->
+                <rect x="72" y="108" width="56" height="12" rx="6" fill="#C9A24B" opacity="0.15"/>
+                <text x="100" y="117.5" text-anchor="middle" font-family="monospace" font-size="6"
+                      font-weight="700" fill="#C9A24B">±5 MIN WINDOW</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="send-stats" data-anim style="--anim-delay:0.28s">
+        <div class="send-stat">
+            <div class="send-stat__icon">📍</div>
+            <div><div class="send-stat__val">3 areas</div><p class="send-stat__lbl">Covering all of South Tipperary</p></div>
+        </div>
+        <div class="send-stat">
+            <div class="send-stat__icon">🏘️</div>
+            <div><div class="send-stat__val">11 towns</div><p class="send-stat__lbl">Across South Tipperary's main towns</p></div>
+        </div>
+        <div class="send-stat">
+            <div class="send-stat__icon">💶</div>
+            <div><div class="send-stat__val">From €6</div><p class="send-stat__lbl">Flat-rate, no hidden fees</p></div>
+        </div>
+        <div class="send-stat">
+            <div class="send-stat__icon">📸</div>
+            <div><div class="send-stat__val">Photo proof</div><p class="send-stat__lbl">Doorstep photo on every delivery</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ HOW IT WORKS ════════════════════════════════════════════════ -->
+<section style="background:var(--gs-cream);padding:72px 0">
+    <div class="container-xl">
+        <div class="eyebrow mb-2" data-anim>How it works</div>
+        <h2 data-anim style="--anim-delay:0.06s;font-weight:400;letter-spacing:-0.02em;color:var(--gs-bog-deep);margin-bottom:8px">Three steps, no hassle</h2>
+        <p data-anim style="--anim-delay:0.1s;color:var(--gs-stone);font-family:var(--display);font-style:italic;font-size:17px;margin-bottom:36px">
+            Book and pay in under 2 minutes.
+        </p>
+        <div class="hiw-send-grid" data-anim style="--anim-delay:0.14s">
+            <div class="hiw-send-card">
+                <div class="hiw-send-num">1</div>
+                <h3>Fill in the form</h3>
+                <p>Enter both addresses and your price appears instantly — no quote, no waiting.</p>
+            </div>
+            <div class="hiw-send-card">
+                <div class="hiw-send-num">2</div>
+                <h3>Pay securely online</h3>
+                <p>Pay by card via Stripe. Booking is confirmed the moment payment clears — fully automated.</p>
+            </div>
+            <div class="hiw-send-card">
+                <div class="hiw-send-num">3</div>
+                <h3>We collect &amp; deliver</h3>
+                <p>Doorstep photo the moment it arrives. Proof of delivery every single time.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ BOOKING FORM ═══════════════════════════════════════════════ -->
+<section id="book" style="background:var(--gs-paper);padding:72px 0;border-top:1px solid var(--gs-mist)">
+    <div class="container-xl">
+        <div class="eyebrow mb-2 text-center" data-anim>Book your pickup</div>
+        <h2 class="text-center mb-4" data-anim style="--anim-delay:0.06s;font-weight:400;letter-spacing:-0.02em;color:var(--gs-bog-deep)">
+            See your price. Pay now.
+        </h2>
+
+        <div class="send-layout" data-anim style="--anim-delay:0.1s">
+
+            <!-- LEFT — form -->
+            <div class="send-form">
+                <div class="send-form-header">
+                    <h3>Booking details</h3>
+                    <p>Fill in all fields — your price updates live as you type.</p>
+                </div>
+                <div class="send-form-body">
+                    <form method="post" id="sendForm">
+                        @Html.AntiForgeryToken()
+
+                        <!-- PICKUP -->
+                        <div class="send-section-label">Pickup location</div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label asp-for="PickupAddress" class="form-label">Pickup address</label>
+                                <input asp-for="PickupAddress" class="form-control" id="pickupAddress" placeholder="e.g. 12 Main Street, Clonmel" oninput="onAddressInput('pickup')" />
+                                <span asp-validation-for="PickupAddress" class="text-danger"></span>
+                                <input type="hidden" asp-for="PickupZone" id="pickupZone" />
+                                <label class="form-label" style="margin-top:10px">Eircode</label>
+                                <input type="text" class="form-control" id="pickupEircode"
+                                       maxlength="8" placeholder="e.g. E91 AB12"
+                                       autocomplete="postal-code"
+                                       required
+                                       style="text-transform:uppercase"
+                                       oninput="onEircodeInput('pickup')" />
+                                <div id="pickupAreaConfirm"
+                                     style="display:none;margin-top:6px;font-size:13px;font-weight:600;color:var(--gs-bog-deep)"></div>
+                                <select id="pickupFallbackSelect" class="form-select"
+                                        style="display:none;margin-top:8px"
+                                        onchange="onFallbackSelect('pickup')">
+                                    <option value="">— Select your area —</option>
+                                    <option value="A">Clonmel</option>
+                                    <option value="B">Cahir / Fethard / Carrick / Kilsheelan / Ardfinnan / Newcastle</option>
+                                    <option value="C">Cashel / Clogheen / Killenaule / Mullinahone</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- DROP-OFF -->
+                        <div class="send-section-label">Drop-off location</div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label asp-for="DropoffAddress" class="form-label">Drop-off address</label>
+                                <input asp-for="DropoffAddress" class="form-control" id="dropoffAddress" placeholder="e.g. 4 Mill Road, Cahir" oninput="onAddressInput('dropoff')" />
+                                <span asp-validation-for="DropoffAddress" class="text-danger"></span>
+                                <input type="hidden" asp-for="DropoffZone" id="dropoffZone" />
+                                <label class="form-label" style="margin-top:10px">Eircode</label>
+                                <input type="text" class="form-control" id="dropoffEircode"
+                                       maxlength="8" placeholder="e.g. E91 AB12"
+                                       autocomplete="postal-code"
+                                       required
+                                       style="text-transform:uppercase"
+                                       oninput="onEircodeInput('dropoff')" />
+                                <div id="dropoffAreaConfirm"
+                                     style="display:none;margin-top:6px;font-size:13px;font-weight:600;color:var(--gs-bog-deep)"></div>
+                                <select id="dropoffFallbackSelect" class="form-select"
+                                        style="display:none;margin-top:8px"
+                                        onchange="onFallbackSelect('dropoff')">
+                                    <option value="">— Select your area —</option>
+                                    <option value="A">Clonmel</option>
+                                    <option value="B">Cahir / Fethard / Carrick / Kilsheelan / Ardfinnan / Newcastle</option>
+                                    <option value="C">Cashel / Clogheen / Killenaule / Mullinahone</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- ITEM + SCHEDULE -->
+                        <div class="send-section-label">Item &amp; schedule</div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label asp-for="ItemDescription" class="form-label">What is it?</label>
+                                <input asp-for="ItemDescription" class="form-control" placeholder="e.g. a birthday cake, a parcel, medication" />
+                                <span asp-validation-for="ItemDescription" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="PreferredDate" class="form-label">Preferred date</label>
+                                <input asp-for="PreferredDate" type="date" id="preferredDate" min="@Model.MinDate" />
+                                <span asp-validation-for="PreferredDate" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="PreferredTime" class="form-label">Preferred time</label>
+                                <input asp-for="PreferredTime" type="time" id="preferredTime" min="07:00" max="21:00" onchange="calcPrice()" />
+                                <span asp-validation-for="PreferredTime" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Operating hours + minimum booking notice -->
+                        <div style="background:rgba(201,162,75,0.08);border:1px solid rgba(201,162,75,0.22);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:var(--gs-bog-deep);margin-bottom:6px">
+                            ⏰ <strong>@Model.MinBookingNoticeHours hours minimum notice required.</strong>
+                            &nbsp;·&nbsp;
+                            @if (Model.OperatingAllDays)
+                            {
+                                <span>Operating Monday–Sunday 10am–6pm.</span>
+                            }
+                            else
+                            {
+                                <span>Operating <strong>Saturday and Sunday</strong> only, 10am–6pm.</span>
+                            }
+                        </div>
+
+                        <!-- Dynamic surcharge warning — toggled by JS when evening or Sunday is selected -->
+                        <div id="surchargeAlert" role="alert" style="display:none;background:rgba(156,42,26,0.07);border:1px solid rgba(156,42,26,0.25);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:var(--gs-bog-deep);margin-bottom:6px">
+                            <strong style="color:var(--gs-claret)">+€5 surcharge applies</strong> — <span id="surchargeAlertReason"></span> deliveries carry a small premium, reflected in your total on the right.
+                        </div>
+
+                        <!-- CONTACT -->
+                        <div class="send-section-label">Your details</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="ContactName" class="form-label">Full name</label>
+                                <input asp-for="ContactName" class="form-control" placeholder="Your name" />
+                                <span asp-validation-for="ContactName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ContactPhone" class="form-label">Phone number</label>
+                                <input asp-for="ContactPhone" class="form-control" placeholder="e.g. 087 123 4567" type="tel" />
+                                <span asp-validation-for="ContactPhone" class="text-danger"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="ContactEmail" class="form-label">Email address</label>
+                                <input asp-for="ContactEmail" class="form-control" placeholder="your@email.com" type="email" />
+                                <span asp-validation-for="ContactEmail" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- RECIPIENT -->
+                        <div class="send-section-label" style="margin-top:24px">Recipient details</div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="RecipientName" class="form-label">Recipient's name</label>
+                                <input asp-for="RecipientName" class="form-control" placeholder="Who should we deliver to?" />
+                                <span asp-validation-for="RecipientName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="RecipientPhone" class="form-label">Recipient's phone</label>
+                                <input asp-for="RecipientPhone" class="form-control" placeholder="e.g. 086 123 4567" type="tel" />
+                                <span asp-validation-for="RecipientPhone" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- SPECIAL INSTRUCTIONS -->
+                        <div class="send-section-label">Special instructions <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--gs-stone)">(optional)</span></div>
+                        <div class="mb-4">
+                            <textarea asp-for="SpecialInstructions" class="form-control" rows="2" placeholder="e.g. Leave at door, call on arrival, fragile — handle with care"></textarea>
+                        </div>
+
+                        <!-- SIZE ACKNOWLEDGEMENT -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="SizeAcknowledged" class="form-check-input" type="checkbox" id="sizeCheck" />
+                                <label class="form-check-label" for="sizeCheck" style="font-size:13px;color:var(--gs-bog-deep)">
+                                    My item fits in a standard car boot and is under 60 kg
+                                </label>
+                                <span asp-validation-for="SizeAcknowledged" class="text-danger d-block"></span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT — sidebar -->
+            <div class="send-sidebar">
+                <!-- Live price card -->
+                <div class="price-card">
+                    <div class="price-card-head">
+                        <div class="price-card-head__label">Your price</div>
+                        <div class="price-card-head__amount" id="priceDisplay">—</div>
+                        <div class="price-card-head__note" id="priceNote">Enter both addresses to see price</div>
+                    </div>
+                    <div class="price-card-body" id="priceBreakdown" style="display:none">
+                        <div class="price-card-row"><span>Base rate</span><span id="baseDisplay">—</span></div>
+                        <div class="price-card-row" id="surchargeRow" style="display:none"><span id="surchargeLabel">Surcharge</span><span>+€5</span></div>
+                    </div>
+                </div>
+
+                <button type="submit" form="sendForm" class="btn btn-gold w-100 mb-3" id="submitBtn" disabled style="font-size:16px;padding:14px 24px">
+                    Enter your addresses to see price
+                </button>
+                <p class="text-center mb-2" style="font-size:12px;color:var(--gs-stone)">
+                    Secure payment via Stripe · Card only
+                </p>
+                <p class="text-center mb-4" style="font-size:11px;color:var(--gs-stone)">
+                    Cancel up to 1 hour before pickup for a full refund. <a href="/support" style="color:var(--gs-gold-deep);text-decoration:underline">See cancellation policy →</a>
+                </p>
+
+                <div class="text-center mb-3" style="font-size:12px;color:var(--gs-stone)">Prefer to book by message?</div>
+                <a href="https://wa.me/353899258702?text=Hi%2C%20I%27d%20like%20to%20book%20a%20Pickup%20%26%20Drop%20delivery." target="_blank" rel="noopener"
+                   class="btn w-100 mb-4 d-flex align-items-center justify-content-center gap-2"
+                   style="background:#25D366;color:#fff;font-size:14px;font-weight:600;border:none;border-radius:var(--r-sm);padding:12px 20px">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                    Book via WhatsApp
+                </a>
+
+                <!-- Area reference -->
+                <div class="zone-ref-card">
+                    <h4>Area reference</h4>
+                    <div class="zone-row">
+                        <p><strong>Clonmel</strong> — town centre and surrounds — €6</p>
+                    </div>
+                    <div class="zone-row">
+                        <p><strong>Mid Tipperary</strong> — Cahir, Fethard, Carrick-on-Suir, Kilsheelan, Ardfinnan, Newcastle — €10</p>
+                    </div>
+                    <div class="zone-row">
+                        <p><strong>Outer Tipperary</strong> — Cashel, Clogheen, Killenaule, Mullinahone — €14</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ═══ PRICING TABLE ════════════════════════════════════════════════ -->
+<section style="background:var(--gs-bog-deep);color:var(--gs-cream);padding:72px 0">
+    <div class="container-xl">
+        <div class="eyebrow mb-2" style="color:var(--gs-gold-soft)" data-anim>Flat-rate pricing</div>
+        <h2 data-anim style="--anim-delay:0.06s;font-weight:400;letter-spacing:-0.02em;color:var(--gs-cream);margin-bottom:8px">Simple, flat rates</h2>
+        <p data-anim style="--anim-delay:0.1s;font-family:var(--display);font-style:italic;color:var(--gs-gold-soft);font-size:17px;margin-bottom:36px">
+            No surprises. The price you see is the price you pay.
+        </p>
+        <div data-anim style="--anim-delay:0.14s;overflow-x:auto">
+            <table class="pickup-price-table" style="border-radius:var(--r-lg);overflow:hidden;min-width:480px;border:1px solid rgba(255,255,255,0.07)">
+                <thead>
+                    <tr>
+                        <th style="text-align:left">Area</th>
+                        <th style="text-align:left">Towns covered</th>
+                        <th style="text-align:right">Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Clonmel</td><td>Town centre and surrounds</td><td style="text-align:right">€6</td></tr>
+                    <tr><td>Mid Tipperary</td><td>Cahir, Fethard, Carrick, Kilsheelan</td><td style="text-align:right">€10</td></tr>
+                    <tr><td>Outer Tipperary</td><td>Cashel, Clogheen, Killenaule, Mullinahone</td><td style="text-align:right">€14</td></tr>
+                    <tr><td>Between areas</td><td>Pickup and drop in different areas — e.g. Clonmel to Cahir</td><td style="text-align:right">€12</td></tr>
+                    <tr><td>Evening / Sunday</td><td>After 6pm or any Sunday</td><td style="text-align:right">+€5</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p data-anim style="--anim-delay:0.18s;font-size:12px;color:var(--gs-fog);margin-top:16px">
+            Items must fit in a standard car boot (max 60 kg · max 120×60×60 cm). By booking you confirm your item fits within these limits.
+        </p>
+    </div>
+</section>
+
+@section Scripts {
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script>
+(function () {
+    var PRICES = { A: 6, B: 10, C: 14 };
+    var CROSS_ZONE = 12;
+    var SURCHARGE = 5;
+    var MIN_NOTICE_HOURS = @Model.MinBookingNoticeHours;
+    var OPERATING_ALL_DAYS = @(Model.OperatingAllDays ? "true" : "false");
+
+    // Set minimum date based on configured notice hours
+    (function enforceDateMin() {
+        var dateInput = document.getElementById('preferredDate');
+        if (!dateInput) return;
+        var minAllowed = new Date(Date.now() + MIN_NOTICE_HOURS * 3600000);
+        var yyyy = minAllowed.getFullYear();
+        var mm   = String(minAllowed.getMonth() + 1).padStart(2, '0');
+        var dd   = String(minAllowed.getDate()).padStart(2, '0');
+        dateInput.min = yyyy + '-' + mm + '-' + dd;
+        if (dateInput.value && dateInput.value < dateInput.min)
+            dateInput.value = dateInput.min;
+    })();
+
+    // Keep time min in sync with selected date
+    function updateTimeMin(dateVal) {
+        var timeInput = document.getElementById('preferredTime');
+        if (!dateVal) { timeInput.min = '07:00'; return; }
+        var today = new Date();
+        var sel   = new Date(dateVal + 'T00:00:00');
+        var isToday = sel.getFullYear() === today.getFullYear() &&
+                      sel.getMonth()    === today.getMonth()    &&
+                      sel.getDate()     === today.getDate();
+        if (isToday) {
+            var earliest = new Date(today.getTime() + MIN_NOTICE_HOURS * 3600000);
+            // Round up to next 30-min slot
+            var mins = earliest.getMinutes();
+            if (mins > 0) earliest.setMinutes(mins <= 30 ? 30 : 60, 0, 0);
+            var hh = String(earliest.getHours()).padStart(2, '0');
+            var mm = String(earliest.getMinutes()).padStart(2, '0');
+            timeInput.min = hh + ':' + mm;
+            // Clear time if the current value is now too early
+            if (timeInput.value && timeInput.value < timeInput.min)
+                timeInput.value = '';
+        } else {
+            timeInput.min = '07:00';
+        }
+    }
+
+    // Warn + clear if a weekday is chosen while operating weekends-only
+    document.getElementById('preferredDate').addEventListener('change', function() {
+        if (!OPERATING_ALL_DAYS) {
+            var d = new Date(this.value + 'T00:00:00');
+            var dow = d.getDay(); // 0=Sun, 6=Sat
+            if (dow !== 0 && dow !== 6) {
+                alert('We currently operate Saturday and Sunday only. Please choose a weekend date.');
+                this.value = '';
+                calcPrice();
+                return;
+            }
+        }
+        updateTimeMin(this.value);
+        calcPrice();
+    });
+
+    function calcPrice() {
+        var pz   = document.getElementById('pickupZone').value;
+        var dz   = document.getElementById('dropoffZone').value;
+        var date = document.getElementById('preferredDate').value;
+        var time = document.getElementById('preferredTime').value;
+
+        var display      = document.getElementById('priceDisplay');
+        var note         = document.getElementById('priceNote');
+        var breakdown    = document.getElementById('priceBreakdown');
+        var baseEl       = document.getElementById('baseDisplay');
+        var sRow         = document.getElementById('surchargeRow');
+        var sLabel       = document.getElementById('surchargeLabel');
+        var btn          = document.getElementById('submitBtn');
+        var inlineAlert  = document.getElementById('surchargeAlert');
+        var alertReason  = document.getElementById('surchargeAlertReason');
+
+        // Always calculate surcharge from date/time — independent of zone selection
+        var surcharge = 0, surchargeReason = '';
+        if (date) {
+            var d = new Date(date + 'T00:00:00');
+            if (d.getDay() === 0) { surcharge = SURCHARGE; surchargeReason = 'Sunday surcharge'; }
+        }
+        if (!surchargeReason && time) {
+            if (parseInt(time.split(':')[0], 10) >= 18) { surcharge = SURCHARGE; surchargeReason = 'Evening surcharge'; }
+        }
+
+        // Show inline surcharge alert as soon as date/time is picked, regardless of zones
+        if (inlineAlert) {
+            if (surcharge > 0) {
+                inlineAlert.style.display = '';
+                if (alertReason) alertReason.textContent = surchargeReason === 'Sunday surcharge' ? 'Sunday' : 'evening (after 6 pm)';
+            } else {
+                inlineAlert.style.display = 'none';
+            }
+        }
+
+        if (!pz || !dz) {
+            display.textContent     = '—';
+            note.textContent        = 'Enter both addresses to see price';
+            breakdown.style.display = 'none';
+            btn.disabled    = true;
+            btn.textContent = 'Enter your addresses to see price';
+            return;
+        }
+
+        var base = (pz === dz) ? PRICES[pz] : CROSS_ZONE;
+        var baseLabel = pz === dz ? 'Zone ' + pz + ' flat rate' : 'Cross-zone rate';
+
+        var total = base + surcharge;
+        display.textContent     = '€' + total;
+        note.textContent        = baseLabel;
+        breakdown.style.display = '';
+        baseEl.textContent      = '€' + base;
+        if (surcharge > 0) {
+            sRow.style.display = '';
+            sLabel.textContent = surchargeReason;
+        } else {
+            sRow.style.display = 'none';
+        }
+        btn.disabled    = false;
+        btn.textContent = 'Book & pay €' + total + ' →';
+    }
+
+    // ── Eircode routing key map ──
+    var EIRCODE_MAP = {
+        'E91': 'A',  // Clonmel area
+        'E34': null  // Mid/Outer Tip — check town name to decide B vs C
+    };
+
+    // ── Town name detection with word-boundary + street suffix guard ──
+    var TOWN_ZONES = {
+        A: ['clonmel'],
+        B: ['cahir','fethard','carrick-on-suir','carrick on suir','carrickonsuir','kilsheelan','ardfinnan','newcastle'],
+        C: ['cashel','clogheen','killenaule','mullinahone']
+    };
+    var STREET_SUFFIXES = ['road','street','avenue','close','drive','way','lane','place','terrace'];
+
+    function detectZoneFromText(address) {
+        var lower = address.toLowerCase().trim();
+        var zones = Object.keys(TOWN_ZONES);
+        for (var zi = 0; zi < zones.length; zi++) {
+            var zone = zones[zi];
+            var towns = TOWN_ZONES[zone];
+            for (var ti = 0; ti < towns.length; ti++) {
+                var town = towns[ti];
+                var pat = new RegExp('\\b' + town.replace(/-/g,'[-\\s]') + '\\b', 'i');
+                if (!pat.test(lower)) continue;
+                var matchIdx = lower.search(pat);
+                var after = lower.slice(matchIdx + town.length).trim();
+                var next = after.split(/[\s,]+/)[0];
+                if (STREET_SUFFIXES.indexOf(next) !== -1) continue;
+                return zone;
+            }
+        }
+        return null;
+    }
+
+    // ── Eircode input handler ──
+    function onEircodeInput(which) {
+        var raw = (document.getElementById(which + 'Eircode').value || '').trim().toUpperCase().replace(/\s/g, '');
+        var routing = raw.slice(0, 3);
+        if (routing.length < 3) { tryTownDetection(which); return; }
+        if (Object.prototype.hasOwnProperty.call(EIRCODE_MAP, routing)) {
+            var zone = EIRCODE_MAP[routing];
+            if (zone) { setArea(which, zone); return; }
+            // E34 — decide B vs C from address text
+            var addr = document.getElementById(which + 'Address').value || '';
+            var tz = detectZoneFromText(addr);
+            if (tz && tz !== 'A') { setArea(which, tz); }
+            else { showFallback(which); }
+        } else {
+            setOutsideCoverage(which);
+        }
+    }
+
+    // ── Address text handler ──
+    function onAddressInput(which) {
+        var eir = (document.getElementById(which + 'Eircode').value || '').trim();
+        if (eir.length >= 3) return; // Eircode takes priority
+        tryTownDetection(which);
+    }
+
+    function tryTownDetection(which) {
+        var addr = document.getElementById(which + 'Address').value || '';
+        var zone = detectZoneFromText(addr);
+        if (zone) { setArea(which, zone); }
+        else if (addr.length > 5) { showFallback(which); }
+        else { clearArea(which); }
+    }
+
+    // ── Area label map and setter/clearer helpers ──
+    var AREA_LABELS = {
+        A: { name: 'Clonmel',      rate: '€6'  },
+        B: { name: 'Cahir area',   rate: '€10' },
+        C: { name: 'Cashel area',  rate: '€14' }
+    };
+
+    function setArea(which, zone) {
+        document.getElementById(which + 'Zone').value = zone;
+        var lbl = AREA_LABELS[zone];
+        var el = document.getElementById(which + 'AreaConfirm');
+        el.textContent = lbl.name + ' ✓';
+        el.style.color = 'var(--gs-bog-deep)';
+        el.style.display = '';
+        document.getElementById(which + 'FallbackSelect').style.display = 'none';
+        calcPrice();
+    }
+
+    function clearArea(which) {
+        document.getElementById(which + 'Zone').value = '';
+        document.getElementById(which + 'AreaConfirm').style.display = 'none';
+        document.getElementById(which + 'FallbackSelect').style.display = 'none';
+        calcPrice();
+    }
+
+    function showFallback(which) {
+        document.getElementById(which + 'Zone').value = '';
+        document.getElementById(which + 'AreaConfirm').style.display = 'none';
+        document.getElementById(which + 'FallbackSelect').style.display = '';
+        calcPrice();
+    }
+
+    function setOutsideCoverage(which) {
+        document.getElementById(which + 'Zone').value = '';
+        var el = document.getElementById(which + 'AreaConfirm');
+        el.textContent = 'Sorry, we only cover South Tipperary. Check our coverage map.';
+        el.style.color = '#9C2A1A';
+        el.style.display = '';
+        document.getElementById(which + 'FallbackSelect').style.display = 'none';
+        calcPrice();
+    }
+
+    function onFallbackSelect(which) {
+        var v = document.getElementById(which + 'FallbackSelect').value;
+        if (v) setArea(which, v);
+    }
+
+    window.calcPrice = calcPrice;
+    window.onAddressInput = onAddressInput;
+    window.onEircodeInput = onEircodeInput;
+    window.onFallbackSelect = onFallbackSelect;
+})();
+</script>
+}

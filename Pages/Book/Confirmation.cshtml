@@ -1,0 +1,66 @@
+@page "{token}"
+@model ConfirmationModel
+@{
+    ViewData["Title"] = "Order Confirmed";
+    var o = Model.Order!;
+}
+
+<div class="py-5 text-center" style="background:var(--gs-paper);min-height:80vh">
+    <div class="container-xl">
+        <div style="max-width:560px;margin:0 auto">
+            <div style="font-size:3rem;margin-bottom:1rem">✓</div>
+            <h2 class="mb-2">Your order is confirmed</h2>
+            <p class="text-muted mb-4">We'll start preparing everything — you'll hear from us on WhatsApp shortly.</p>
+
+            <div class="mb-4">
+                <div class="text-muted small mb-1">Order reference</div>
+                <div class="order-ref">@o.Reference</div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="text-start mb-4 p-4 rounded" style="background:white;border:1.5px solid var(--gs-fog)">
+                <h6 class="mb-3">What happens next</h6>
+                <div class="timeline-step">
+                    <div class="timeline-dot done"></div>
+                    <div>
+                        <div class="fw-semibold small">Order received</div>
+                        <div class="text-muted" style="font-size:0.8rem">Just now</div>
+                    </div>
+                </div>
+                <div class="timeline-step-line" style="margin-left:5px;height:20px;width:2px;background:var(--gs-fog)"></div>
+                <div class="timeline-step">
+                    <div class="timeline-dot"></div>
+                    <div>
+                        <div class="fw-semibold small">Order confirmed</div>
+                        <div class="text-muted" style="font-size:0.8rem">Within 30 minutes — we'll send a WhatsApp</div>
+                    </div>
+                </div>
+                <div class="timeline-step-line" style="margin-left:5px;height:20px;width:2px;background:var(--gs-fog)"></div>
+                <div class="timeline-step">
+                    <div class="timeline-dot"></div>
+                    <div>
+                        <div class="fw-semibold small">Item collected from @(o.Shop?.Name ?? "shop")</div>
+                        <div class="text-muted" style="font-size:0.8rem">We'll send a photo of the item</div>
+                    </div>
+                </div>
+                <div class="timeline-step-line" style="margin-left:5px;height:20px;width:2px;background:var(--gs-fog)"></div>
+                <div class="timeline-step">
+                    <div class="timeline-dot"></div>
+                    <div>
+                        <div class="fw-semibold small">Delivered to @o.RecipientName</div>
+                        <div class="text-muted" style="font-size:0.8rem">
+                            @o.DeliveryDate.ToString("ddd d MMM") · @o.WindowLabel
+                            <span class="tier-badge @o.StatusBadgeClass ms-1" style="background:var(--gs-fog);color:var(--gs-ink)">@o.TierLabel</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a asp-page="/Track/Index" asp-route-token="@o.TrackingToken"
+                   class="btn btn-gold btn-lg px-4">Track live</a>
+                <a asp-page="/Index" class="btn btn-outline-secondary btn-lg px-4">Back to home</a>
+            </div>
+        </div>
+    </div>
+</div>

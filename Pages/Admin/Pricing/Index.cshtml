@@ -1,0 +1,64 @@
+@page
+@model TippSendApp.Pages.Admin.Pricing.IndexModel
+@{
+    ViewData["Title"] = "Pricing Reference";
+}
+
+<div class="admin-header">
+    <div class="container-fluid d-flex align-items-center gap-3">
+        <a asp-page="/Admin/Index" style="color:var(--gs-fog);text-decoration:none">← Admin</a>
+        <span class="footer-brand" style="font-size:1.1rem">Pricing Reference</span>
+    </div>
+</div>
+
+<div class="container py-4" style="max-width:700px">
+    <div class="alert alert-info mb-4">
+        Pricing is configured in <code>Services/PricingService.cs</code>. This page is a read-only reference.
+    </div>
+
+    <h5 class="mb-3">Service fees by tier & zone</h5>
+    <table class="table table-bordered table-sm mb-4">
+        <thead class="table-dark">
+            <tr><th>Tier</th><th>Window</th><th>Zone A (0–5 km)</th><th>Zone B (9–20 km)</th><th>Zone C (20–25 km)</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="tier-badge tier-standard">Standard</span></td>
+                <td>±90 min</td>
+                <td>€8</td><td>€12</td><td>€15</td>
+            </tr>
+            <tr>
+                <td><span class="tier-badge tier-precision">Precision</span></td>
+                <td>±30 min</td>
+                <td>€12</td><td>€18</td><td>€22</td>
+            </tr>
+            <tr>
+                <td><span class="tier-badge tier-exact">Exact Moment</span></td>
+                <td>±5 min</td>
+                <td>€18</td><td>€25</td><td>€30</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h5 class="mb-3">Surcharges & rules</h5>
+    <table class="table table-bordered table-sm mb-4">
+        <tbody>
+            <tr><td class="fw-semibold">Evening surcharge</td><td>+€8 for any delivery after 18:00</td></tr>
+            <tr><td class="fw-semibold">Sunday surcharge</td><td>+€8 for any Sunday delivery (same as evening)</td></tr>
+            <tr><td class="fw-semibold">Item markup</td><td>8% on top of shop price (transparent, shown at checkout)</td></tr>
+            <tr><td class="fw-semibold">Max item value</td><td>€500 per delivery (insurance limit, Phase 1)</td></tr>
+            <tr><td class="fw-semibold">Capacity cap</td><td>Max 15 deliveries per day (single-driver Phase 1)</td></tr>
+            <tr><td class="fw-semibold">Precision refund</td><td>Auto-refunded if window is exceeded by operator</td></tr>
+        </tbody>
+    </table>
+
+    <h5 class="mb-3">Zones</h5>
+    <table class="table table-bordered table-sm">
+        <thead class="table-dark"><tr><th>Zone</th><th>Distance</th><th>Towns</th></tr></thead>
+        <tbody>
+            <tr><td><strong>A</strong></td><td>0–5 km</td><td>Clonmel town centre</td></tr>
+            <tr><td><strong>B</strong></td><td>9–20 km</td><td>Kilsheelan (9), Fethard (15), Cahir (16), Ardfinnan (18), Carrick-on-Suir (20)</td></tr>
+            <tr><td><strong>C</strong></td><td>20–25 km</td><td>Cashel (24), Clogheen (22), Killenaule (25), Mullinahone (25)</td></tr>
+        </tbody>
+    </table>
+</div>

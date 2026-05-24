@@ -1,0 +1,387 @@
+@page
+@model Step1Model
+@{
+    ViewData["Title"] = "Book a Delivery — Step 1";
+}
+
+@section Styles {
+<style>
+body { background: var(--gs-paper); }
+
+/* ── Step progress bar ── */
+.booking-wizard {
+    background: white;
+    border-bottom: 1px solid var(--gs-mist);
+    padding: 20px 0;
+    position: sticky;
+    top: 68px;
+    z-index: 10;
+}
+.wizard-steps {
+    display: flex;
+    align-items: center;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+.wizard-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    position: relative;
+}
+.wizard-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 40px;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 2px;
+    background: var(--gs-mist);
+    z-index: 0;
+}
+.wizard-step.done:not(:last-child)::after { background: var(--gs-bog-deep); }
+.wizard-step__dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    flex-shrink: 0; position: relative; z-index: 1;
+    border: 2px solid var(--gs-mist);
+    background: white; color: var(--gs-stone);
+    font-family: var(--mono);
+}
+.wizard-step.active .wizard-step__dot {
+    background: var(--gs-bog-deep); color: white;
+    border-color: var(--gs-bog-deep);
+    box-shadow: 0 0 0 4px rgba(20,39,31,0.12);
+}
+.wizard-step.done .wizard-step__dot {
+    background: var(--gs-gold); color: var(--gs-bog-deep);
+    border-color: var(--gs-gold);
+}
+.wizard-step__label {
+    font-size: 12px; font-weight: 600;
+    color: var(--gs-stone);
+    white-space: nowrap;
+}
+.wizard-step.active .wizard-step__label { color: var(--gs-bog-deep); }
+.wizard-step.done .wizard-step__label { color: var(--gs-bog-deep); }
+@@media (max-width: 520px) { .wizard-step__label { display: none; } }
+
+/* ── Two-column layout ── */
+.book-layout {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 32px;
+    max-width: 1100px;
+    margin: 48px auto;
+    padding: 0 24px;
+    align-items: start;
+}
+@@media (max-width: 900px) { .book-layout { grid-template-columns: 1fr; } }
+
+/* ── Form panel ── */
+.book-form-panel {
+    background: white;
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+}
+.book-form-header {
+    background: var(--gs-bog-deep);
+    padding: 24px 28px;
+}
+.book-form-header h2 {
+    color: var(--gs-cream); font-size: 20px; font-weight: 500;
+    margin: 0 0 4px; letter-spacing: -0.01em;
+}
+.book-form-header p { color: var(--gs-fog); font-size: 13px; margin: 0; }
+.book-form-body { padding: 28px; }
+
+.book-form-body .form-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--gs-stone); margin-bottom: 6px;
+}
+.book-form-body .form-control,
+.book-form-body .form-select {
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-sm);
+    font-size: 14px; padding: 11px 14px;
+    background: var(--gs-paper); color: var(--gs-ink);
+    width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.book-form-body .form-control:focus,
+.book-form-body .form-select:focus {
+    border-color: var(--gs-gold);
+    box-shadow: 0 0 0 3px rgba(201,162,75,0.12);
+    outline: none;
+    background: white;
+}
+.book-section-divider {
+    font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--gs-gold-deep);
+    margin: 24px 0 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--gs-mist);
+}
+
+/* Fragile toggle */
+.toggle-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px;
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-sm);
+}
+.toggle-row__label { font-size: 14px; color: var(--gs-ink); font-weight: 500; }
+.toggle-row__sub { font-size: 12px; color: var(--gs-stone); margin-top: 2px; }
+.toggle {
+    position: relative; width: 44px; height: 24px; flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track {
+    position: absolute; inset: 0;
+    background: var(--gs-mist); border-radius: 24px;
+    transition: background 0.2s; cursor: pointer;
+}
+.toggle input:checked + .toggle-track { background: var(--gs-gold); }
+.toggle-track::after {
+    content: ''; position: absolute;
+    width: 18px; height: 18px; top: 3px; left: 3px;
+    background: white; border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+
+/* ── Map panel (right) ── */
+.book-map-panel {
+    background: white;
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    position: sticky;
+    top: 140px;
+}
+.book-map-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--gs-mist);
+    display: flex; justify-content: space-between; align-items: center;
+}
+.book-map-header h3 { font-size: 14px; font-weight: 600; color: var(--gs-bog-deep); margin: 0; }
+.book-map-illustration {
+    height: 280px;
+    background: linear-gradient(180deg, #c8dfc8 0%, #a8c8a8 40%, #8ab89a 100%);
+    position: relative;
+    overflow: hidden;
+}
+.book-map-inputs { padding: 16px 20px; }
+.map-input-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-sm);
+    margin-bottom: 8px;
+    background: var(--gs-paper);
+    font-size: 14px; color: var(--gs-stone);
+}
+.map-input-row:last-child { margin-bottom: 0; }
+.map-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.map-dot.pickup  { background: var(--gs-gold); }
+.map-dot.dropoff { background: var(--gs-bog-deep); }
+</style>
+}
+
+<!-- ── Step progress bar ── -->
+<div class="booking-wizard">
+    <div class="wizard-steps">
+        <div class="wizard-step active">
+            <div class="wizard-step__dot">1</div>
+            <div class="wizard-step__label">Item Details</div>
+        </div>
+        <div class="wizard-step">
+            <div class="wizard-step__dot">2</div>
+            <div class="wizard-step__label">Pickup</div>
+        </div>
+        <div class="wizard-step">
+            <div class="wizard-step__dot">3</div>
+            <div class="wizard-step__label">Delivery</div>
+        </div>
+        <div class="wizard-step">
+            <div class="wizard-step__dot">4</div>
+            <div class="wizard-step__label">Payment</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Two-column layout ── -->
+<div class="book-layout">
+
+    <!-- Left: form -->
+    <div class="book-form-panel">
+        <div class="book-form-header">
+            <h2>Item Information</h2>
+            <p>Tell us about the gift you'd like to send.</p>
+        </div>
+        <div class="book-form-body">
+            <form method="post" id="step1Form">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" style="font-size:13px"></div>
+
+                <!-- Shop selection -->
+                <div class="book-section-divider">Where to source from</div>
+                <div class="mb-4">
+                    <label class="form-label">Which shop?</label>
+                    <select asp-for="ShopId" asp-items="Model.ShopOptions" class="form-select"></select>
+                    <div id="shopOverrideWrap" class="mt-2" style="display:none">
+                        <input asp-for="ShopNameOverride" class="form-control" placeholder="Describe the shop or area — e.g. 'a good florist in Clonmel'" />
+                    </div>
+                    <div style="font-size:12px;color:var(--gs-stone);margin-top:6px">Choose "I'll describe what I need" and we'll source a great local option.</div>
+                </div>
+
+                <!-- Item description -->
+                <div class="book-section-divider">What are you sending?</div>
+                <div class="mb-4">
+                    <label asp-for="ItemDescription" class="form-label">Item description</label>
+                    <textarea asp-for="ItemDescription" class="form-control" rows="3"
+                              placeholder="E.g. A dozen red roses, wrapped. Or: birthday cake with 'Happy 70th' in blue icing."></textarea>
+                    <span asp-validation-for="ItemDescription" class="text-danger" style="font-size:12px"></span>
+                </div>
+
+                <!-- Pricing -->
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6">
+                        <label asp-for="EstimatedItemPrice" class="form-label">Estimated item price</label>
+                        <div style="position:relative">
+                            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gs-stone);font-size:14px;font-family:var(--mono)">€</span>
+                            <input asp-for="EstimatedItemPrice" class="form-control" type="number" step="0.01" min="0" placeholder="25.00" style="padding-left:28px"/>
+                        </div>
+                        <span asp-validation-for="EstimatedItemPrice" class="text-danger" style="font-size:12px"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="BudgetCap" class="form-label">Budget cap <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+                        <div style="position:relative">
+                            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gs-stone);font-size:14px;font-family:var(--mono)">€</span>
+                            <input asp-for="BudgetCap" class="form-control" type="number" step="0.01" min="0" placeholder="35.00" style="padding-left:28px"/>
+                        </div>
+                        <div style="font-size:12px;color:var(--gs-stone);margin-top:4px">We'll check with you before exceeding this.</div>
+                    </div>
+                </div>
+
+                <!-- Fragile toggle -->
+                <div class="book-section-divider">Special handling</div>
+                <div class="toggle-row mb-4">
+                    <div>
+                        <div class="toggle-row__label">⚠️ Fragile item</div>
+                        <div class="toggle-row__sub">We'll handle with extra care and use protective packaging</div>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" name="IsFragile" id="fragileToggle" />
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- Zero inventory note -->
+                <div style="background:#f0f9f4;border:1px solid #a8d8b8;border-radius:var(--r-sm);padding:14px 16px;margin-bottom:28px;display:flex;gap:10px">
+                    <span style="font-size:16px;flex-shrink:0">✅</span>
+                    <div style="font-size:13px;color:#1a4a30;line-height:1.5">
+                        <strong>Zero inventory promise:</strong> We purchase fresh from the shop on the day. If it's unavailable, we'll call you within 15 minutes with alternatives — or give you a full refund.
+                    </div>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <a asp-page="/Index" style="font-size:14px;color:var(--gs-stone);text-decoration:none;display:flex;align-items:center;gap:6px">
+                        ← Back
+                    </a>
+                    <button type="submit" class="btn btn-gold" style="font-size:16px;padding:14px 32px">
+                        Continue to Pickup →
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right: map panel -->
+    <div class="book-map-panel">
+        <div class="book-map-header">
+            <h3>Delivery area</h3>
+            <span style="font-size:12px;color:var(--gs-stone)">25 km radius · Clonmel</span>
+        </div>
+
+        <!-- Illustrated map of South Tipperary -->
+        <div class="book-map-illustration">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 280" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+                <!-- Map background (terrain) -->
+                <rect width="420" height="280" fill="#d4e8c8"/>
+                <!-- Roads -->
+                <path d="M0,140 Q105,135 210,140 Q315,145 420,138" stroke="#e8e0c8" stroke-width="6" fill="none"/>
+                <path d="M210,0 Q208,70 210,140 Q212,210 210,280" stroke="#e8e0c8" stroke-width="6" fill="none"/>
+                <path d="M50,200 Q130,175 210,140 Q290,105 380,80" stroke="#e8e0c8" stroke-width="4" fill="none" stroke-dasharray="0"/>
+                <!-- River (Suir) -->
+                <path d="M0,180 Q80,172 160,175 Q240,178 320,165 Q380,155 420,150" stroke="#9bb8d8" stroke-width="8" fill="none" opacity="0.7"/>
+                <!-- Town blobs -->
+                <circle cx="210" cy="140" r="22" fill="#c8d8a8" stroke="#b8c898" stroke-width="1.5"/>
+                <circle cx="80" cy="165" r="12" fill="#d0dab8" stroke="#c0ca98" stroke-width="1"/>
+                <circle cx="330" cy="110" r="10" fill="#d0dab8" stroke="#c0ca98" stroke-width="1"/>
+                <circle cx="170" cy="220" r="9" fill="#d0dab8" stroke="#c0ca98" stroke-width="1"/>
+                <circle cx="290" cy="200" r="8" fill="#d0dab8" stroke="#c0ca98" stroke-width="1"/>
+                <!-- Zone circles -->
+                <circle cx="210" cy="140" r="60" fill="none" stroke="rgba(31,58,46,0.15)" stroke-width="1.5" stroke-dasharray="6 4"/>
+                <circle cx="210" cy="140" r="110" fill="none" stroke="rgba(31,58,46,0.1)" stroke-width="1" stroke-dasharray="4 4"/>
+                <!-- Town labels -->
+                <text x="210" y="138" text-anchor="middle" font-size="8" fill="#14271F" font-weight="bold" font-family="sans-serif">CLONMEL</text>
+                <text x="78" y="163" text-anchor="middle" font-size="6.5" fill="#2a3820" font-family="sans-serif">CAHIR</text>
+                <text x="328" y="108" text-anchor="middle" font-size="6.5" fill="#2a3820" font-family="sans-serif">FETHARD</text>
+                <text x="168" y="218" text-anchor="middle" font-size="6" fill="#2a3820" font-family="sans-serif">CARRICK</text>
+                <text x="288" y="198" text-anchor="middle" font-size="6" fill="#2a3820" font-family="sans-serif">CASHEL</text>
+                <!-- Center pin (Clonmel) -->
+                <path d="M210,110 C204,110 198,116 198,123 C198,132 210,144 210,144 C210,144 222,132 222,123 C222,116 216,110 210,110 Z" fill="var(--gs-bog-deep)"/>
+                <circle cx="210" cy="123" r="4" fill="white"/>
+            </svg>
+        </div>
+
+        <!-- Address inputs preview -->
+        <div class="book-map-inputs">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gs-stone);margin-bottom:10px">Delivery route</div>
+            <div class="map-input-row">
+                <span class="map-dot pickup"></span>
+                <span>Pickup Location</span>
+                <span style="margin-left:auto;font-size:12px;color:var(--gs-gold-deep);font-weight:600">Step 2 →</span>
+            </div>
+            <div style="width:2px;height:12px;background:var(--gs-mist);margin-left:18px"></div>
+            <div class="map-input-row">
+                <span class="map-dot dropoff"></span>
+                <span>Drop-off Location</span>
+                <span style="margin-left:auto;font-size:12px;color:var(--gs-stone)">Step 3</span>
+            </div>
+        </div>
+
+        <!-- Pricing quick ref -->
+        <div style="padding:16px 20px;background:var(--gs-paper);border-top:1px solid var(--gs-mist)">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gs-stone);margin-bottom:10px">Delivery rates</div>
+            @foreach (var row in new[] {
+                ("Zone A", "Clonmel town", "€6"),
+                ("Zone B", "9–20 km", "€10"),
+                ("Zone C", "20–25 km", "€14"),
+                ("Cross-zone", "Different zones", "€12"),
+            })
+            {
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.04)">
+                    <span style="font-weight:600;color:var(--gs-bog-deep)">@row.Item1</span>
+                    <span style="color:var(--gs-stone)">@row.Item2</span>
+                    <span style="font-family:var(--mono);font-weight:600;color:var(--gs-bog-deep)">@row.Item3</span>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+<script>
+document.getElementById('ShopId').addEventListener('change', function() {
+    document.getElementById('shopOverrideWrap').style.display = this.value === '' ? 'block' : 'none';
+});
+</script>
+}

@@ -1,0 +1,80 @@
+@page
+@model Step2Model
+@{
+    ViewData["Title"] = "Who is this for?";
+}
+
+<div class="py-5" style="background:var(--gs-paper);min-height:80vh">
+    <div class="container-xl">
+        <div class="text-center mb-4">
+            <div class="booking-progress mb-3">
+                <span class="step-dot done"></span>
+                <span class="step-dot active"></span>
+                <span class="step-dot"></span>
+                <span class="step-dot"></span>
+            </div>
+            <h2>Who is this for?</h2>
+            <p class="text-muted small">Step 2 of 4</p>
+        </div>
+
+        <div class="booking-step-card">
+            <form method="post">
+                <h6 class="mb-3" style="color:var(--gs-bog)">Your details</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="SenderName" class="form-label fw-semibold">Your name</label>
+                        <input asp-for="SenderName" class="form-control" placeholder="Aoife Murphy" />
+                        <span asp-validation-for="SenderName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="SenderEmail" class="form-label fw-semibold">Your email</label>
+                        <input asp-for="SenderEmail" class="form-control" type="email" placeholder="aoife@example.com" />
+                        <span asp-validation-for="SenderEmail" class="text-danger small"></span>
+                        <div class="form-text">We'll send your order confirmation here.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="SenderPhone" class="form-label fw-semibold">Your WhatsApp / phone <span class="fw-normal text-muted">(optional)</span></label>
+                        <input asp-for="SenderPhone" class="form-control" placeholder="+353 87 123 4567" />
+                        <div class="form-text">We'll send updates via WhatsApp if provided.</div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+                <h6 class="mb-3" style="color:var(--gs-bog)">Recipient details</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="RecipientName" class="form-label fw-semibold">Recipient's name</label>
+                        <input asp-for="RecipientName" class="form-control" placeholder="Mam" />
+                        <span asp-validation-for="RecipientName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="RecipientPhone" class="form-label fw-semibold">Recipient's phone <span class="fw-normal text-muted">(optional)</span></label>
+                        <input asp-for="RecipientPhone" class="form-control" placeholder="+353 52 612 0000" />
+                        <div class="form-text">Optional SMS before delivery.</div>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="RecipientAddress" class="form-label fw-semibold">Delivery address</label>
+                        <input asp-for="RecipientAddress" class="form-control" placeholder="12 Parnell Street" />
+                        <span asp-validation-for="RecipientAddress" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="RecipientTown" class="form-label fw-semibold">Town</label>
+                        <select asp-for="RecipientTown" class="form-select">
+                            <option value="">— Select town —</option>
+                            @foreach (var town in Step2Model.IrishTowns)
+                            {
+                                <option value="@town">@town</option>
+                            }
+                        </select>
+                        <span asp-validation-for="RecipientTown" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a asp-page="Step1" class="btn btn-link text-muted">← Back</a>
+                    <button type="submit" class="btn btn-gold btn-lg px-5">Next: Choose a time →</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,60 @@
+@page
+@model TippSendApp.Pages.Admin.SettingsModel
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<div class="admin-header">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <a asp-page="/Admin/Index" style="color:var(--gs-fog);text-decoration:none">← Admin</a>
+            <span class="footer-brand" style="font-size:1.1rem">Settings</span>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4" style="max-width:560px">
+
+    @if (TempData["Saved"] is not null)
+    {
+        <div class="alert alert-success py-2 mb-4">Settings saved.</div>
+    }
+
+    <form method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="card mb-4">
+            <div class="card-header fw-semibold">Operating hours</div>
+            <div class="card-body">
+                <div class="form-check form-switch mb-1">
+                    <input class="form-check-input" type="checkbox" role="switch"
+                           id="operatingAllDays" asp-for="OperatingAllDays" />
+                    <label class="form-check-label" for="operatingAllDays">
+                        <strong>Accept bookings all days (Mon–Sun)</strong>
+                    </label>
+                </div>
+                <div class="text-muted small">
+                    Toggle off to restrict bookings to <strong>Saturday &amp; Sunday only</strong>.
+                    The front-end notice on /send updates automatically.
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header fw-semibold">Minimum booking notice</div>
+            <div class="card-body">
+                <label class="form-label" for="minNotice">Hours of advance notice required</label>
+                <div class="d-flex align-items-center gap-2">
+                    <input type="number" class="form-control" id="minNotice"
+                           asp-for="MinBookingNoticeHours" min="1" max="72" style="max-width:100px" />
+                    <span class="text-muted small">hours (default: 2)</span>
+                </div>
+                <div class="text-muted small mt-1">
+                    Controls the earliest pickup time customers can select on the booking form.
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-dark px-4">Save settings</button>
+    </form>
+</div>

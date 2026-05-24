@@ -1,0 +1,153 @@
+@page
+@model TippSendApp.Areas.Identity.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Operator Login";
+    Layout = "/Pages/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+<style>
+body { background: var(--gs-cream); }
+
+.login-wrap {
+    min-height: calc(100vh - 140px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+}
+
+.login-card {
+    background: var(--gs-paper);
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-lg);
+    padding: 48px 44px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow-2);
+}
+@@media (max-width: 480px) {
+    .login-card { padding: 32px 24px; }
+}
+
+.login-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-family: var(--display);
+    font-size: 22px;
+    color: var(--gs-bog-deep);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+}
+.login-logo img {
+    height: 32px;
+    width: auto;
+    mix-blend-mode: multiply;
+}
+.login-logo em { font-style: italic; font-weight: 500; }
+
+.login-subtitle {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gs-stone);
+    margin-bottom: 32px;
+}
+
+.login-card .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gs-bog-deep);
+    margin-bottom: 6px;
+}
+.login-card .form-control {
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-sm);
+    font-size: 14px;
+    padding: 11px 14px;
+    background: white;
+    color: var(--gs-ink);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.login-card .form-control:focus {
+    border-color: var(--gs-gold);
+    box-shadow: 0 0 0 3px rgba(201,162,75,0.14);
+    outline: none;
+}
+.login-card .form-check-label {
+    font-size: 13px;
+    color: var(--gs-stone);
+}
+.login-card .form-check-input:checked {
+    background-color: var(--gs-bog);
+    border-color: var(--gs-bog);
+}
+.login-divider {
+    border: none;
+    border-top: 1px solid var(--gs-mist);
+    margin: 24px 0;
+}
+</style>
+}
+
+<div class="login-wrap">
+    <div class="login-card">
+        <a href="/" class="login-logo">
+            <img src="~/Logo1.png" alt="TippSend" />
+            <span>Tipp<em>Send</em></span>
+        </a>
+        <div class="login-subtitle">Operator login</div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert d-flex gap-2 align-items-start mb-4"
+                 style="background:rgba(156,42,26,0.08);border:1px solid rgba(156,42,26,0.2);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;color:var(--gs-claret)">
+                <span>⚠</span>
+                <div>
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@error.ErrorMessage</div>
+                    }
+                </div>
+            </div>
+        }
+
+        <form method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="ReturnUrl" />
+
+            <div class="mb-3">
+                <label asp-for="Input.Email" class="form-label">Email address</label>
+                <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="you@example.com" />
+                <span asp-validation-for="Input.Email" class="text-danger" style="font-size:12px"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Input.Password" class="form-label">Password</label>
+                <input asp-for="Input.Password" class="form-control" autocomplete="current-password" placeholder="••••••••" />
+                <span asp-validation-for="Input.Password" class="text-danger" style="font-size:12px"></span>
+            </div>
+
+            <div class="form-check mb-4">
+                <input asp-for="Input.RememberMe" class="form-check-input" />
+                <label asp-for="Input.RememberMe" class="form-check-label">Keep me signed in</label>
+            </div>
+
+            <button type="submit" class="btn btn-gold w-100">Sign in →</button>
+        </form>
+
+        <hr class="login-divider" />
+        <p class="text-center mb-0" style="font-size:12px;color:var(--gs-stone)">
+            TippSend · Clonmel, Co. Tipperary
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

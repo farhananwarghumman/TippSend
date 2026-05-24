@@ -1,0 +1,345 @@
+@page "/partner"
+@model IndexModel
+@{
+    ViewData["Title"] = "Partner With Us — TippSend";
+}
+
+@section Styles {
+<style>
+body { background: var(--gs-cream); }
+
+/* ── Split layout ── */
+.partner-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+}
+@@media (max-width: 900px) { .partner-split { grid-template-columns: 1fr; min-height: auto; } }
+
+.partner-left {
+    background: var(--gs-bog-deep);
+    padding: 72px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: relative;
+    overflow: hidden;
+}
+@@media (max-width: 900px) { .partner-left { padding: 56px 32px; } }
+@@media (max-width: 480px) { .partner-left { padding: 40px 20px; } }
+
+.partner-right {
+    background: var(--gs-cream);
+    padding: 72px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+@@media (max-width: 900px) { .partner-right { padding: 48px 32px; } }
+@@media (max-width: 480px) { .partner-right { padding: 36px 20px; } }
+
+/* Team photo on left */
+.partner-scene {
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    margin-top: 36px;
+    margin-bottom: 32px;
+    position: relative;
+}
+.partner-scene img { display: block; width: 100%; height: 280px; object-fit: cover; object-position: center top; }
+
+/* Feature tiles */
+.feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+@@media (max-width: 1100px) { .feature-grid { grid-template-columns: 1fr; } }
+.feature-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--r-md);
+    padding: 18px 16px;
+    transition: background 0.15s;
+}
+.feature-item:hover { background: rgba(255,255,255,0.1); }
+.feature-item__icon { font-size: 22px; margin-bottom: 8px; }
+.feature-item__title { font-size: 13px; font-weight: 600; color: var(--gs-cream); margin-bottom: 4px; }
+.feature-item__desc { font-size: 12px; color: var(--gs-fog); line-height: 1.5; margin: 0; }
+
+/* Business type pills */
+.biz-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.biz-pill {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--r-pill);
+    padding: 6px 14px;
+    font-size: 13px; color: var(--gs-fog);
+}
+
+/* Form */
+.partner-form .form-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--gs-bog-deep); margin-bottom: 6px;
+}
+.partner-form .form-control,
+.partner-form .form-select {
+    border: 1.5px solid var(--gs-mist);
+    border-radius: var(--r-sm);
+    font-size: 14px; padding: 12px 14px;
+    background: white; color: var(--gs-ink);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+}
+.partner-form .form-control:focus,
+.partner-form .form-select:focus {
+    border-color: var(--gs-gold);
+    box-shadow: 0 0 0 3px rgba(201,162,75,0.12);
+    outline: none;
+}
+.partner-form .text-danger { font-size: 12px; }
+</style>
+}
+
+<div class="partner-split">
+
+    <!-- ── LEFT — hero + photo illustration + features ── -->
+    <div class="partner-left">
+        <div style="position:relative;z-index:1">
+            <div class="gs-hero__stamp mb-4" style="border-color:rgba(201,162,75,0.5);color:var(--gs-gold-soft)" data-anim>
+                For local businesses
+            </div>
+            <h1 data-anim style="--anim-delay:0.08s;font-family:var(--display);font-weight:400;font-size:clamp(32px,3.5vw,50px);line-height:1.08;letter-spacing:-0.03em;color:var(--gs-cream);margin:0 0 16px">
+                Grow Your Business<br>
+                <span style="font-style:italic;color:var(--gs-gold)">with Local Delivery</span>
+            </h1>
+            <p data-anim style="--anim-delay:0.14s;color:var(--gs-fog);font-size:15px;line-height:1.65;max-width:400px;margin-bottom:24px">
+                Partner with TippSend to expand your reach across South Tipperary. No van, no insurance, no faff.
+            </p>
+            <a href="#contact" class="btn btn-gold" data-anim style="--anim-delay:0.18s;align-self:flex-start">
+                Become a Partner →
+            </a>
+
+            <!-- TippSend team photo -->
+            <div class="partner-scene" data-anim style="--anim-delay:0.22s">
+                <img src="/images/team-photo.jpg" alt="TippSend delivery team — man and woman in green uniforms next to branded van with flowers">
+            </div>
+
+            <!-- Feature tiles -->
+            <div class="feature-grid" data-anim style="--anim-delay:0.26s">
+                <div class="feature-item">
+                    <div class="feature-item__icon">📈</div>
+                    <div class="feature-item__title">Reach More Customers</div>
+                    <p class="feature-item__desc">Tap into our growing local network and add delivery without the overhead.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item__icon">🚗</div>
+                    <div class="feature-item__title">Reliable Logistics</div>
+                    <p class="feature-item__desc">Dedicated driver. Fast, secure delivery every time — we handle the last mile.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item__icon">🔗</div>
+                    <div class="feature-item__title">Easy Integration</div>
+                    <p class="feature-item__desc">Drop delivery into your existing workflow. No complex setup required.</p>
+                </div>
+            </div>
+
+            <!-- Who it's for -->
+            <div style="margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1)" data-anim style="--anim-delay:0.3s">
+                <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gs-gold-soft);margin-bottom:12px">Built for</div>
+                <div class="biz-pills">
+                    @foreach (var biz in new[] { ("🌸","Florists"), ("🎂","Bakeries"), ("💊","Pharmacies"), ("🏪","Gift shops"), ("🍽️","Delis & food") })
+                    {
+                        <span class="biz-pill">@biz.Item1 @biz.Item2</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── RIGHT — form ── -->
+    <div class="partner-right" id="contact">
+        @if (Model.Submitted)
+        {
+            <div style="text-align:center" data-anim>
+                <div style="font-size:56px;margin-bottom:20px">✅</div>
+                <h2 style="font-family:var(--display);font-weight:400;color:var(--gs-bog-deep);margin-bottom:12px">Application sent!</h2>
+                <p style="color:var(--gs-stone);max-width:360px;margin:0 auto 20px;line-height:1.6">
+                    Thanks for your interest. Here's what happens next:
+                </p>
+                <div style="text-align:left;max-width:340px;margin:0 auto 28px;display:flex;flex-direction:column;gap:10px;font-size:14px;color:var(--gs-stone)">
+                    <div style="display:flex;gap:10px"><span style="font-family:var(--mono);font-weight:700;color:var(--gs-gold);flex-shrink:0">01</span><span>We call you within <strong style="color:var(--gs-bog-deep)">one business day.</strong></span></div>
+                    <div style="display:flex;gap:10px"><span style="font-family:var(--mono);font-weight:700;color:var(--gs-gold);flex-shrink:0">02</span><span>We agree your rate and delivery schedule.</span></div>
+                    <div style="display:flex;gap:10px"><span style="font-family:var(--mono);font-weight:700;color:var(--gs-gold);flex-shrink:0">03</span><span>You go live within <strong style="color:var(--gs-bog-deep)">48 hours.</strong> First week free.</span></div>
+                </div>
+                <a href="/" class="btn btn-outline-cream">Back to home</a>
+            </div>
+        }
+        else
+        {
+            <div data-anim>
+                <div class="eyebrow mb-2">Ready to partner?</div>
+                <h2 style="font-family:var(--display);font-weight:400;font-size:clamp(26px,3vw,38px);letter-spacing:-0.02em;color:var(--gs-bog-deep);margin-bottom:8px">Get in Touch</h2>
+
+                <!-- Tiered pricing table -->
+                <div style="border:1.5px solid var(--gs-mist);border-radius:var(--r-lg);overflow:hidden;margin-bottom:28px">
+                    <table style="width:100%;border-collapse:collapse;font-size:13px">
+                        <thead>
+                            <tr style="background:var(--gs-bog-deep)">
+                                <th style="padding:10px 14px;color:var(--gs-gold-soft);font-weight:700;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;text-align:left">Deliveries / week</th>
+                                <th style="padding:10px 14px;color:var(--gs-gold-soft);font-weight:700;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;text-align:left">Monthly retainer</th>
+                                <th style="padding:10px 14px;color:var(--gs-gold-soft);font-weight:700;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;text-align:left">Per delivery</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid var(--gs-mist)">
+                                <td style="padding:11px 14px;color:var(--gs-bog-deep);font-weight:600">1–5 deliveries</td>
+                                <td style="padding:11px 14px;font-family:var(--mono);font-weight:700;color:var(--gs-bog-deep)">€120 / mo</td>
+                                <td style="padding:11px 14px;color:var(--gs-stone)">€6 per drop</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid var(--gs-mist);background:rgba(201,162,75,0.05)">
+                                <td style="padding:11px 14px;color:var(--gs-bog-deep);font-weight:600">5–15 deliveries <span style="font-size:10px;background:var(--gs-gold);color:var(--gs-bog-deep);border-radius:var(--r-pill);padding:2px 8px;margin-left:4px;font-weight:700">POPULAR</span></td>
+                                <td style="padding:11px 14px;font-family:var(--mono);font-weight:700;color:var(--gs-bog-deep)">€200 / mo</td>
+                                <td style="padding:11px 14px;color:var(--gs-stone)">€5 per drop</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:11px 14px;color:var(--gs-bog-deep);font-weight:600">15+ deliveries</td>
+                                <td style="padding:11px 14px;font-family:var(--mono);font-weight:700;color:var(--gs-bog-deep)">Custom quote</td>
+                                <td style="padding:11px 14px;color:var(--gs-stone)">Agreed rate</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- What's included -->
+                <div style="background:var(--gs-paper);border:1.5px solid var(--gs-mist);border-radius:var(--r-md);padding:16px 18px;margin-bottom:28px">
+                    <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gs-bog-deep);margin-bottom:10px">What's included in every plan</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:13px;color:var(--gs-stone)">
+                        <div>✓ <span style="color:var(--gs-bog-deep);font-weight:500">Doorstep photo</span> on every delivery</div>
+                        <div>✓ <span style="color:var(--gs-bog-deep);font-weight:500">WhatsApp updates</span> to your customers</div>
+                        <div>✓ <span style="color:var(--gs-bog-deep);font-weight:500">Weekend deliveries</span> available (+€5 per drop)</div>
+                        <div>✓ <span style="color:var(--gs-bog-deep);font-weight:500">Monthly invoice</span> with delivery log</div>
+                        <div>✓ <span style="color:var(--gs-bog-deep);font-weight:500">Live tracking link</span> for each order</div>
+                        <div>✓ <span style="color:var(--gs-bog-deep);font-weight:500">Go live within 48 hours</span> of sign-up</div>
+                    </div>
+                </div>
+
+                <!-- Testimonial -->
+                <figure style="margin:0 0 28px;padding:16px 20px;background:rgba(31,58,46,0.04);border-left:3px solid var(--gs-gold);border-radius:0 var(--r-sm) var(--r-sm) 0">
+                    <blockquote style="margin:0 0 8px;font-family:var(--display);font-style:italic;font-size:15px;color:var(--gs-bog-deep);line-height:1.55">
+                        "David saves me every Saturday. That's the whole story."
+                    </blockquote>
+                    <figcaption style="font-size:12px;color:var(--gs-stone)">— Margaret, <strong style="color:var(--gs-bog-deep)">Blooming Thing Floristry</strong>, Clonmel</figcaption>
+                </figure>
+
+                <!-- Type-specific copy — revealed by JS when shop type is selected -->
+                <div id="shopTypeNote" style="display:none;background:rgba(201,162,75,0.08);border:1px solid rgba(201,162,75,0.22);border-radius:var(--r-sm);padding:10px 14px;font-size:13px;color:var(--gs-bog-deep);margin-bottom:20px">
+                    <span id="shopTypeNoteText"></span>
+                </div>
+
+                <form method="post" class="partner-form">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label">Full name</label>
+                            <input asp-for="ContactName" class="form-control" placeholder="Your name" />
+                            <span asp-validation-for="ContactName" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Business name</label>
+                            <input asp-for="BusinessName" class="form-control" placeholder="e.g. Murphy's Florists" />
+                            <span asp-validation-for="BusinessName" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Email address</label>
+                            <input asp-for="Email" class="form-control" placeholder="you@business.ie" type="email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Phone number</label>
+                            <input asp-for="Phone" class="form-control" placeholder="087 123 4567" type="tel" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Type of shop</label>
+                            <select asp-for="ShopType" class="form-select">
+                                <option value="">— Select —</option>
+                                <option value="Florist">Florist</option>
+                                <option value="Bakery">Bakery</option>
+                                <option value="Pharmacy">Pharmacy</option>
+                                <option value="Gift shop">Gift shop</option>
+                                <option value="Deli / Food">Deli / Food</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span asp-validation-for="ShopType" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">Weekly deliveries</label>
+                            <select asp-for="WeeklyDeliveries" class="form-select">
+                                <option value="">— Estimate —</option>
+                                <option value="1–5">1–5</option>
+                                <option value="5–15">5–15</option>
+                                <option value="15+">15+</option>
+                            </select>
+                            <span asp-validation-for="WeeklyDeliveries" class="text-danger"></span>
+                        </div>
+                        <div class="col-12 pt-2">
+                            <button type="submit" class="btn btn-gold w-100" style="font-size:16px;padding:14px;justify-content:center">
+                                Submit Application →
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- What happens next -->
+                <div style="margin-top:20px;padding:16px 18px;background:var(--gs-paper);border:1.5px solid var(--gs-mist);border-radius:var(--r-md)">
+                    <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gs-bog-deep);margin-bottom:12px">What happens next</div>
+                    <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--gs-stone)">
+                        <div style="display:flex;gap:10px;align-items:flex-start">
+                            <span style="font-family:var(--mono);font-weight:700;color:var(--gs-gold);flex-shrink:0">01</span>
+                            <span>We call you within <strong style="color:var(--gs-bog-deep)">one business day</strong> to discuss your needs.</span>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:flex-start">
+                            <span style="font-family:var(--mono);font-weight:700;color:var(--gs-gold);flex-shrink:0">02</span>
+                            <span>We agree your <strong style="color:var(--gs-bog-deep)">rate and delivery schedule</strong> — no contract pressure.</span>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:flex-start">
+                            <span style="font-family:var(--mono);font-weight:700;color:var(--gs-gold);flex-shrink:0">03</span>
+                            <span>You <strong style="color:var(--gs-bog-deep)">go live within 48 hours</strong>. First week is free — no risk.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+<script>
+(function() {
+    var notes = {
+        'Florist':      'We handle flower deliveries with extra care — padded transport and priority time slots so arrangements arrive in perfect condition.',
+        'Bakery':       'Celebration cakes, morning rolls, fresh-baked goods — we know timing matters. Every delivery arrives on time and in perfect condition.',
+        'Pharmacy':     'We handle prescription deliveries with full discretion. Every drop includes a doorstep photo and WhatsApp confirmation to the sender.',
+        'Gift shop':    'Your customers get the full gifting experience — we add a handwritten card option, photo confirmation, and live tracking link.',
+        'Deli / Food':  'Fresh is everything. We collect within the hour and deliver with care to protect quality, with a photo the moment it lands.',
+        'Other':        'Whatever your business needs, we\'ll build a delivery schedule that works around your hours and order patterns.'
+    };
+    var select = document.querySelector('select[name="ShopType"], select[id$="ShopType"]');
+    if (!select) return;
+    select.addEventListener('change', function() {
+        var noteEl = document.getElementById('shopTypeNote');
+        var noteText = document.getElementById('shopTypeNoteText');
+        if (!noteEl || !noteText) return;
+        var msg = notes[this.value];
+        if (msg) {
+            noteText.textContent = msg;
+            noteEl.style.display = '';
+        } else {
+            noteEl.style.display = 'none';
+        }
+    });
+})();
+</script>
+}

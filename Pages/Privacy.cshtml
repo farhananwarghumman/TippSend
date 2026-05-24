@@ -1,0 +1,165 @@
+@page
+@model PrivacyModel
+@{
+    ViewData["Title"] = "Privacy Policy — TippSend";
+}
+
+@section Styles {
+<style>
+body { background: var(--gs-cream); }
+.privacy-hero {
+    background: var(--gs-bog-deep);
+    padding: 64px 0 48px;
+}
+.privacy-body {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+}
+.privacy-body h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gs-bog-deep);
+    margin: 40px 0 10px;
+    letter-spacing: -0.01em;
+}
+.privacy-body h2:first-child { margin-top: 0; }
+.privacy-body p, .privacy-body li {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--gs-stone);
+}
+.privacy-body ul {
+    padding-left: 20px;
+    margin-bottom: 0;
+}
+.privacy-body a { color: var(--gs-gold-deep); }
+.privacy-updated {
+    font-size: 12px;
+    color: var(--gs-fog);
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--gs-mist);
+}
+</style>
+}
+
+<div class="privacy-hero">
+    <div class="container-xl">
+        <div class="eyebrow mb-2" style="color:var(--gs-gold-soft)">Legal</div>
+        <h1 style="font-family:var(--display);font-weight:400;font-size:clamp(32px,4vw,52px);color:var(--gs-cream);letter-spacing:-0.03em;margin:0">
+            Privacy Policy
+        </h1>
+        <p style="color:var(--gs-fog);font-size:15px;margin-top:12px;max-width:560px">
+            We keep this short and plain. Here's exactly what we collect, why, and what we do with it.
+        </p>
+    </div>
+</div>
+
+<div class="container-xl">
+    <div class="privacy-body">
+
+        <h2>Who we are</h2>
+        <p>
+            TippSend is a local delivery service operating in South Tipperary, Ireland. Our contact email is
+            <a href="mailto:hello@tippsend.ie">hello@tippsend.ie</a>. When we say "we", "us", or "TippSend",
+            we mean the person running this service.
+        </p>
+
+        <h2>What personal data we collect</h2>
+        <p>When you place an order or make a booking, we collect:</p>
+        <ul>
+            <li>Your name, email address, and phone number</li>
+            <li>The recipient's name, phone number, and delivery address</li>
+            <li>Your pickup or delivery address</li>
+            <li>Any special instructions you provide</li>
+            <li>Your order details (item description, preferred date and time, price paid)</li>
+        </ul>
+        <p>
+            We do <strong>not</strong> collect or store your payment card details. All payments are processed
+            securely by <a href="https://stripe.com/ie/privacy" target="_blank" rel="noopener">Stripe</a>,
+            which has its own privacy policy.
+        </p>
+
+        <h2>Why we collect it</h2>
+        <p>
+            We need this information to fulfil the delivery you've paid for — to collect your item, deliver it
+            to the right person, and contact you if something comes up. The legal basis under GDPR is
+            <strong>contract performance</strong> (Article 6(1)(b)): we can't do the job without it.
+        </p>
+
+        <h2>How we use it</h2>
+        <ul>
+            <li>To carry out your delivery and contact you or the recipient about it</li>
+            <li>To send you a booking confirmation email</li>
+            <li>To send status updates (collected, out for delivery, delivered)</li>
+            <li>To resolve disputes or answer questions about your order</li>
+        </ul>
+        <p>We do not use your data for marketing, and we do not sell or share it with third parties for any commercial purpose.</p>
+
+        <h2>Who we share it with</h2>
+        <p>Your data is shared only with services that are essential to running TippSend:</p>
+        <ul>
+            <li><strong>Stripe</strong> — payment processing (they receive your email address at checkout)</li>
+            <li><strong>Microsoft Azure</strong> — our hosting provider, which stores the database containing your order records</li>
+            <li><strong>SendGrid / our email provider</strong> — used to send you confirmation and status emails</li>
+        </ul>
+        <p>All of these providers are GDPR-compliant and process data only as necessary to provide their service to us.</p>
+
+        <h2>How long we keep your data</h2>
+        <p>
+            We keep order records for <strong>2 years</strong> from the date of delivery. After that, personal
+            details (name, email, phone, address) are deleted. We may retain non-personal summary data
+            (order count, revenue totals) for longer for business purposes.
+        </p>
+
+        <h2>Your rights</h2>
+        <p>Under GDPR, you have the right to:</p>
+        <ul>
+            <li><strong>Access</strong> — ask us what personal data we hold about you</li>
+            <li><strong>Correction</strong> — ask us to correct inaccurate data</li>
+            <li><strong>Erasure</strong> — ask us to delete your personal data ("right to be forgotten")</li>
+            <li><strong>Restriction</strong> — ask us to stop processing your data in certain circumstances</li>
+            <li><strong>Portability</strong> — request a copy of your data in a readable format</li>
+        </ul>
+        <p>
+            To exercise any of these rights, email us at
+            <a href="mailto:hello@tippsend.ie">hello@tippsend.ie</a>. We will respond within 30 days.
+        </p>
+
+        <h2>Cookies</h2>
+        <p>
+            TippSend uses only essential cookies — for login sessions and form security (CSRF protection).
+            We do not use tracking cookies, advertising cookies, or analytics services that identify you
+            personally. No cookie consent banner is required.
+        </p>
+
+        <h2>Data security</h2>
+        <p>
+            Your data is stored in a secured Microsoft Azure SQL database with access restricted to
+            the TippSend operator. All data is transmitted over HTTPS. We take reasonable steps to protect
+            your information, but no system is completely foolproof.
+        </p>
+
+        <h2>Data breaches</h2>
+        <p>
+            In the unlikely event of a data breach affecting your personal data, we will notify the Irish
+            Data Protection Commission (DPC) within 72 hours as required by GDPR, and notify affected
+            individuals where appropriate.
+        </p>
+
+        <h2>Contact &amp; complaints</h2>
+        <p>
+            If you have any question about how we handle your data, email us at
+            <a href="mailto:hello@tippsend.ie">hello@tippsend.ie</a>.
+        </p>
+        <p>
+            If you are not satisfied with our response, you have the right to lodge a complaint with the
+            <a href="https://www.dataprotection.ie" target="_blank" rel="noopener">Data Protection Commission (DPC)</a>,
+            the supervisory authority for data protection in Ireland.
+        </p>
+
+        <p class="privacy-updated">Last updated: May 2026</p>
+
+    </div>
+</div>

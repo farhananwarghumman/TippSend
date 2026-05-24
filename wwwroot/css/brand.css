@@ -1,0 +1,1016 @@
+/* TippSend Design System
+   Tokens: Bog #1F3A2E · Cream #F6F0E2 · Gold #C9A24B · Paper #FAF6EC
+   Fonts: Newsreader (display) · Geist (UI) · Geist Mono (numbers/times)
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..600&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap');
+
+/* ================================================================
+   TOKENS
+   ================================================================ */
+:root {
+  --gs-bog:       #1F3A2E;
+  --gs-bog-deep:  #14271F;
+  --gs-bog-soft:  #2D4F40;
+  --gs-cream:     #F6F0E2;
+  --gs-cream-deep:#ECE2C7;
+  --gs-paper:     #FAF6EC;
+  --gs-paper-2:   #FFFCF3;
+  --gs-gold:      #C9A24B;
+  --gs-gold-deep: #A8842F;
+  --gs-gold-soft: #E2C57E;
+  --gs-ink:       #14110C;
+  --gs-ink-2:     #2A2620;
+  --gs-stone:     #7A7363;
+  --gs-mist:      #C9C0A8;
+  --gs-mist-2:    #DDD4BA;
+  --gs-claret:    #9C2A1A;
+  --gs-leaf:      #2E7D5B;
+  /* legacy compat */
+  --gs-fog:       #C9C0A8;
+
+  --display: 'Newsreader', Georgia, serif;
+  --sans:    'Geist', system-ui, -apple-system, sans-serif;
+  --mono:    'Geist Mono', ui-monospace, 'Courier New', monospace;
+
+  --r-sm:   6px;
+  --r-md:   12px;
+  --r-lg:   20px;
+  --r-pill: 999px;
+
+  --shadow-1: 0 1px 0 rgba(20,17,12,.04), 0 2px 6px rgba(20,17,12,.04);
+  --shadow-2: 0 8px 24px rgba(20,17,12,.08), 0 1px 3px rgba(20,17,12,.05);
+  --shadow-3: 0 24px 60px rgba(20,17,12,.18), 0 2px 6px rgba(20,17,12,.06);
+
+  --ease-out-soft:  cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-reveal:    cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring:    cubic-bezier(0.2, 0.8, 0.2, 1.0);
+}
+
+/* ================================================================
+   BASE
+   ================================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: var(--sans);
+  background: var(--gs-cream);
+  color: var(--gs-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .display-font, .serif {
+  font-family: var(--display);
+  font-feature-settings: "ss01","ss02";
+  letter-spacing: -0.01em;
+}
+
+.mono, .time-mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gs-stone);
+}
+
+/* ================================================================
+   ANIMATION UTILITIES
+   ================================================================ */
+[data-anim] {
+  opacity: 0;
+  filter: blur(12px);
+  transform: translateY(28px);
+  transition: opacity 0.7s var(--ease-out-soft),
+              filter  0.7s var(--ease-out-soft),
+              transform 0.7s var(--ease-out-soft);
+  transition-delay: var(--anim-delay, 0s);
+  will-change: opacity, filter, transform;
+}
+[data-anim].in {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+[data-anim="media"] {
+  opacity: 0;
+  filter: blur(10px);
+  transform: scale(0.92);
+  transition: opacity 0.65s var(--ease-overshoot),
+              filter   0.65s var(--ease-overshoot),
+              transform 0.65s var(--ease-overshoot);
+  transition-delay: var(--anim-delay, 0s);
+}
+[data-anim="media"].in {
+  opacity: 1; filter: blur(0); transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-anim], [data-anim="media"] {
+    transform: none !important;
+    filter: none !important;
+    transition: opacity 0.5s ease !important;
+  }
+}
+
+/* ================================================================
+   NAV  (frosted-glass cream — overrides Bootstrap navbar defaults)
+   ================================================================ */
+.gs-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(246,240,226,0.84) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid transparent;
+  padding: 16px 32px !important;
+  transition: border-color 0.3s ease, padding 0.3s ease, background 0.3s ease;
+}
+.gs-nav.scrolled {
+  border-bottom-color: var(--gs-mist);
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+.gs-nav .navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  padding: 0;
+  font-family: var(--display);
+  font-size: 20px;
+  color: var(--gs-bog-deep) !important;
+  letter-spacing: -0.01em;
+}
+.gs-nav .navbar-brand img {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+/* Shrink logo on mobile */
+@media (max-width: 480px) {
+  .gs-nav .navbar-brand img { height: 30px; }
+}
+.gs-nav .navbar-brand em { font-style: italic; font-weight: 500; }
+
+.gs-nav .nav-link {
+  position: relative;
+  color: var(--gs-ink) !important;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 0 !important;
+  margin: 0 12px;
+  text-decoration: none;
+  opacity: 1 !important;
+}
+.gs-nav .nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1.5px;
+  background: var(--gs-bog);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s var(--ease-out-soft);
+}
+.gs-nav .nav-link:hover::after { transform: scaleX(1); }
+
+.gs-nav .navbar-toggler { 
+  border: 1.5px solid var(--gs-mist) !important; 
+  color: var(--gs-ink);
+  padding: 6px 10px !important;
+}
+/* Explicitly set hamburger icon (dark lines on light bg) since no navbar-light/dark class */
+.gs-nav .navbar-toggler-icon { 
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2820%2C39%2C31%2C0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.5' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+  width: 22px !important;
+  height: 22px !important;
+}
+
+/* ================================================================
+   BUTTONS  (pill-shaped, spring hover)
+   ================================================================ */
+.btn-gold, .btn--gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--gs-gold);
+  color: var(--gs-bog-deep);
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 12px 22px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: 44px;
+  transition: transform 0.18s var(--ease-spring),
+              background 0.18s ease,
+              color 0.18s ease,
+              box-shadow 0.18s ease;
+  will-change: transform;
+}
+.btn-gold:hover, .btn--gold:hover {
+  background: var(--gs-gold-deep);
+  color: var(--gs-cream);
+  box-shadow: 0 10px 24px rgba(168,132,47,.30);
+  transform: scale(1.04);
+}
+.btn-gold:active, .btn--gold:active { transform: scale(0.97); }
+
+.btn-outline-cream, .btn--outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--gs-bog);
+  border: 1.5px solid var(--gs-bog);
+  border-radius: var(--r-pill);
+  padding: 11px 20px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: 44px;
+  transition: transform 0.18s var(--ease-spring),
+              background 0.18s ease,
+              color 0.18s ease;
+}
+.btn-outline-cream:hover, .btn--outline:hover {
+  background: var(--gs-bog);
+  color: var(--gs-cream);
+  transform: scale(1.04);
+}
+.btn-outline-cream:active, .btn--outline:active { transform: scale(0.97); }
+
+/* Primary bog button */
+.btn--primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--gs-bog);
+  color: var(--gs-cream);
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 12px 22px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: 44px;
+  transition: transform 0.18s var(--ease-spring), background 0.18s ease;
+}
+.btn--primary:hover {
+  background: var(--gs-bog-deep);
+  box-shadow: 0 10px 24px rgba(20,39,31,.25);
+  transform: scale(1.04);
+  color: var(--gs-cream);
+}
+.btn--primary:active { transform: scale(0.97); }
+
+/* Sm modifier for nav buttons */
+.btn-sm.btn-gold, .btn-sm.btn-outline-cream {
+  padding: 8px 16px;
+  font-size: 13px;
+  min-height: 36px;
+}
+
+/* ================================================================
+   HERO
+   ================================================================ */
+.gs-hero {
+  background: var(--gs-cream);
+  color: var(--gs-ink);
+  padding: 56px 0 80px;
+}
+.gs-hero h1 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(48px, 7vw, 88px);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  color: var(--gs-bog-deep);
+  margin: 0 0 24px;
+}
+.gs-hero h1 .accent { font-style: italic; color: var(--gs-gold-deep); }
+.gs-hero .lead {
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.55;
+  color: var(--gs-ink-2);
+  max-width: 480px;
+  margin: 0 0 36px;
+}
+.gs-hero__stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--gs-gold-deep);
+  color: var(--gs-gold-deep);
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.gs-hero__stamp::before {
+  content: "";
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gs-gold);
+}
+
+.hero__stats {
+  display: flex;
+  gap: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--gs-mist);
+  flex-wrap: wrap;
+}
+.stat__n { font-family: var(--mono); font-size: 32px; font-weight: 500; color: var(--gs-bog-deep); letter-spacing: -0.03em; }
+.stat__u { font-size: 14px; color: var(--gs-stone); font-weight: 500; margin-left: 4px; }
+.stat__l { font-size: 12px; color: var(--gs-stone); margin-top: 2px; }
+
+/* ================================================================
+   DIAL CARD
+   ================================================================ */
+.dial-card {
+  background: var(--gs-paper);
+  border-radius: 24px;
+  padding: 36px 32px 28px;
+  border: 1px solid var(--gs-mist);
+  box-shadow: var(--shadow-2);
+}
+.dial-card__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gs-stone);
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gs-gold);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.75); }
+}
+.tier-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--gs-gold);
+  color: var(--gs-bog-deep);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+/* legacy time-dial for existing pages */
+.time-dial {
+  background: var(--gs-bog);
+  color: var(--gs-cream);
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  font-family: var(--mono);
+}
+.time-dial .big-time {
+  font-size: 3rem;
+  font-weight: 500;
+  color: var(--gs-gold);
+  letter-spacing: -0.03em;
+}
+.time-dial .window-label {
+  font-size: 0.8rem;
+  color: var(--gs-mist);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ================================================================
+   TIER BADGES
+   ================================================================ */
+.tier-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.25em 0.6em;
+  border-radius: 4px;
+}
+.tier-standard  { background: #e8e3d7; color: var(--gs-ink); }
+.tier-precision { background: var(--gs-bog); color: var(--gs-cream); }
+.tier-exact     { background: var(--gs-gold); color: var(--gs-ink); }
+
+/* ================================================================
+   SECTION LAYOUTS
+   ================================================================ */
+.section-paper  { background: var(--gs-paper); }
+.section-cream  { background: var(--gs-cream); }
+.section-bog    { background: var(--gs-bog); color: var(--gs-cream); }
+.section-bog-deep { background: var(--gs-bog-deep); color: var(--gs-cream); }
+
+/* ================================================================
+   PRICING CARDS
+   ================================================================ */
+.pricing-card {
+  background: white;
+  border: 1.5px solid var(--gs-mist);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.pricing-card:hover {
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+.pricing-card.featured {
+  border-color: var(--gs-gold);
+  box-shadow: 0 4px 20px rgba(201,162,75,0.2);
+}
+.pricing-card .pricing-header {
+  background: var(--gs-bog);
+  color: var(--gs-cream);
+  padding: 1rem 1.25rem;
+}
+.pricing-card.featured .pricing-header {
+  background: var(--gs-gold);
+  color: var(--gs-ink);
+}
+
+/* ================================================================
+   HOW-IT-WORKS STEPS
+   ================================================================ */
+.step-number {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--gs-gold);
+  color: var(--gs-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+/* ================================================================
+   BOOKING WIZARD
+   ================================================================ */
+.booking-progress .step-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--gs-mist);
+  display: inline-block;
+  margin: 0 4px;
+  transition: background 0.2s;
+}
+.booking-progress .step-dot.active { background: var(--gs-gold); }
+.booking-progress .step-dot.done   { background: var(--gs-bog); }
+
+.booking-step-card {
+  background: white;
+  border: 1.5px solid var(--gs-mist);
+  border-radius: var(--r-md);
+  padding: 2rem;
+  max-width: 620px;
+  margin: 0 auto;
+  box-shadow: var(--shadow-1);
+}
+
+/* ================================================================
+   TIME SLOT GRID
+   ================================================================ */
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+.slot-btn {
+  border: 1.5px solid var(--gs-mist);
+  background: white;
+  border-radius: var(--r-sm);
+  padding: 0.5rem 0.25rem;
+  font-size: 0.85rem;
+  font-family: var(--mono);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.slot-btn:hover    { border-color: var(--gs-gold); }
+.slot-btn.selected { background: var(--gs-gold); border-color: var(--gs-gold); color: var(--gs-ink); font-weight: 700; }
+.slot-btn.evening  { border-color: var(--gs-claret); color: var(--gs-claret); }
+
+/* ================================================================
+   CARD MESSAGE
+   ================================================================ */
+.card-message-area {
+  background: #fffef9;
+  border: 1px solid var(--gs-mist);
+  border-radius: var(--r-sm);
+  padding: 1rem;
+  background-image: repeating-linear-gradient(transparent, transparent 27px, #e8e3d7 27px, #e8e3d7 28px);
+  line-height: 28px;
+  font-family: Georgia, serif;
+  font-size: 1rem;
+  width: 100%;
+  resize: vertical;
+  min-height: 140px;
+}
+
+/* ================================================================
+   ORDER SUMMARY
+   ================================================================ */
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--gs-mist);
+  font-size: 0.9rem;
+}
+.summary-row:last-child { border-bottom: none; }
+.summary-row.total-row  { font-weight: 700; font-size: 1.05rem; color: var(--gs-bog); }
+
+/* ================================================================
+   TRACKING PAGE
+   ================================================================ */
+.tracking-status {
+  background: var(--gs-bog);
+  color: var(--gs-cream);
+  border-radius: var(--r-md);
+  padding: 2rem;
+  text-align: center;
+}
+.countdown-timer {
+  font-size: 2.5rem;
+  font-family: var(--mono);
+  color: var(--gs-gold);
+  font-weight: 500;
+}
+.timeline-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem 0;
+}
+.timeline-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--gs-mist);
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+.timeline-dot.active { background: var(--gs-gold); }
+.timeline-dot.done   { background: var(--gs-bog); }
+.timeline-step-line  { width: 2px; background: var(--gs-mist); flex: 1; min-height: 24px; margin-left: 5px; }
+
+/* ================================================================
+   ORDER REFERENCE
+   ================================================================ */
+.order-ref {
+  font-family: var(--mono);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--gs-bog);
+  background: var(--gs-cream);
+  border: 2px solid var(--gs-gold);
+  border-radius: var(--r-sm);
+  padding: 0.5rem 1.5rem;
+  display: inline-block;
+  letter-spacing: 0.04em;
+}
+
+/* ================================================================
+   OPERATOR DASHBOARD
+   ================================================================ */
+.op-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr 380px;
+  height: 100vh;
+  overflow: hidden;
+}
+.op-sidebar {
+  background: var(--gs-bog-deep);
+  color: var(--gs-cream);
+  overflow-y: auto;
+  padding: 1.5rem 1rem;
+}
+.op-sidebar .nav-link {
+  color: var(--gs-cream) !important;
+  opacity: 0.75;
+  border-radius: var(--r-sm);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+.op-sidebar .nav-link:hover,
+.op-sidebar .nav-link.active {
+  opacity: 1;
+  background: rgba(255,255,255,0.1);
+}
+.op-main {
+  overflow-y: auto;
+  background: var(--gs-paper);
+  padding: 0;
+}
+.op-topbar {
+  background: white;
+  border-bottom: 1px solid var(--gs-mist);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.op-topbar .metric-pill {
+  background: var(--gs-paper);
+  border: 1px solid var(--gs-mist);
+  border-radius: 20px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gs-bog);
+}
+.op-detail {
+  background: white;
+  border-left: 1px solid var(--gs-mist);
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+.op-order-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 140px 70px 100px 70px;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.op-order-row:hover    { background: var(--gs-paper); }
+.op-order-row.selected { background: var(--gs-cream); border-left: 3px solid var(--gs-gold); }
+
+/* ================================================================
+   STAT BADGES  (hero dark sections)
+   ================================================================ */
+.stat-badge {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--r-md);
+  padding: 1rem 1.5rem;
+  text-align: center;
+}
+.stat-badge .stat-value {
+  font-size: 1.75rem;
+  font-weight: 500;
+  font-family: var(--mono);
+  color: var(--gs-gold);
+}
+
+/* ================================================================
+   FOOTER
+   ================================================================ */
+.gs-footer {
+  background: var(--gs-bog-deep);
+  color: var(--gs-mist);
+  padding: 3.5rem 0 2rem;
+  font-size: 0.875rem;
+}
+.gs-footer a { color: var(--gs-mist); text-decoration: none; transition: color 0.15s; }
+.gs-footer a:hover { color: var(--gs-gold); }
+.gs-footer .footer-brand {
+  font-family: var(--display);
+  font-size: 1.4rem;
+  color: var(--gs-gold);
+  letter-spacing: -0.01em;
+}
+.gs-footer .footer-brand img {
+  height: 36px;
+  width: auto;
+  filter: brightness(0) invert(1) opacity(0.85);
+}
+.gs-footer .footer-col-head {
+  font-weight: 600;
+  color: white;
+  margin-bottom: 0.75rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.gs-footer .footer-links a {
+  display: block;
+  line-height: 2;
+}
+
+/* ================================================================
+   RESPONSIVE OVERRIDES
+   ================================================================ */
+
+/* ─── Nav (mobile) ─── */
+@media (max-width: 991px) {
+  .gs-nav {
+    padding: 12px 20px !important;
+  }
+  /* Collapsed menu — dark drop-down matching the frosted look */
+  .gs-nav .navbar-collapse {
+    background: rgba(246,240,226,0.97);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--gs-mist);
+    margin: 0 -20px;
+    padding: 12px 20px 16px;
+  }
+  .gs-nav .nav-link {
+    margin: 0;
+    padding: 10px 0 !important;
+    border-bottom: 1px solid rgba(201,192,168,0.4);
+  }
+  .gs-nav .nav-link:last-child { border-bottom: none; }
+  .gs-nav .nav-link::after { display: none; }
+  /* Nav CTA buttons — stack on mobile */
+  .gs-nav .d-flex.gap-2 {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px !important;
+    margin-top: 12px;
+  }
+  .gs-nav .btn-sm.btn-gold,
+  .gs-nav .btn-sm.btn-outline-cream {
+    text-align: center;
+    border-radius: var(--r-md);
+  }
+}
+
+/* ─── Footer ─── */
+@media (max-width: 767px) {
+  .gs-footer { padding: 2.5rem 0 1.5rem; }
+  .gs-footer .footer-brand img { height: 28px; }
+}
+
+/* ─── Booking wizard ─── */
+@media (max-width: 600px) {
+  .booking-step-card {
+    padding: 1.25rem;
+    margin: 0 -4px;
+    border-radius: var(--r-sm);
+  }
+  .slot-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ─── Tracking page ─── */
+@media (max-width: 600px) {
+  .tracking-status { padding: 1.25rem; }
+  .countdown-timer { font-size: 2rem; }
+}
+
+/* ─── Hero stats ─── */
+@media (max-width: 480px) {
+  .hero__stats { gap: 20px; }
+  .stat__n { font-size: 24px; }
+}
+
+/* ─── General ─── */
+@media (max-width: 480px) {
+  .btn-gold, .btn-outline-cream, .btn--primary, .btn--gold, .btn--outline {
+    padding: 10px 18px;
+    font-size: 14px;
+    min-height: 40px;
+  }
+  /* Prevent overflow on very small screens */
+  .container-xl {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* ─── Very small phones (≤360px) ─── */
+@media (max-width: 360px) {
+  .slot-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .container-xl {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  .gs-nav {
+    padding: 10px 12px !important;
+  }
+  .gs-footer {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* ─── Operator dashboard ─── */
+@media (max-width: 1023px) {
+  /* Collapsible sidebar already handled in Dashboard.cshtml inline styles.
+     Ensure order detail panel scrolls independently on tablet */
+  .op-detail {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* ─── Gift sidebar mobile sticky CTA ─── */
+@media (max-width: 768px) {
+  /* Collapsed gift sidebar — show as horizontal strip, not full column */
+  .gift-sidebar {
+    padding: 24px 20px;
+  }
+  /* Gift sidebar CTA — always visible at bottom as sticky bar */
+  .gift-sidebar__cta {
+    margin-top: 20px;
+    padding-top: 16px;
+  }
+  /* Product grid is inside .gift-main which stacks correctly,
+     but ensure it doesn't clip on narrow screens */
+  .product-grid {
+    gap: 12px;
+  }
+}
+
+/* ─── Track page — mobile back/search ─── */
+@media (max-width: 768px) {
+  /* Track sidebar is hidden, show a mobile nav bar above track-main */
+  .track-main {
+    padding: 24px 16px 40px !important;
+  }
+  /* Make search bar full width on mobile */
+  .track-search {
+    max-width: 100%;
+  }
+  /* Status card stacks to 1-col (already done at 600px),
+     but improve the timeline on very small screens */
+  .timeline-steps {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .timeline-steps::before {
+    display: none;
+  }
+  .timeline-step-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+  }
+  .timeline-step-dot {
+    margin: 0;
+    flex-shrink: 0;
+  }
+}
+
+/* ─── Book Step1 map panel — sticky fix on mobile ─── */
+@media (max-width: 900px) {
+  .book-map-panel {
+    position: static;
+  }
+  .book-form-body {
+    padding: 20px 16px;
+  }
+}
+
+/* ─── Book layout padding ─── */
+@media (max-width: 600px) {
+  .book-layout {
+    padding: 0 12px;
+    margin-top: 28px;
+    margin-bottom: 28px;
+  }
+  .book-form-header {
+    padding: 18px 20px;
+  }
+  .book-form-header h2 {
+    font-size: 17px;
+  }
+}
+
+/* ─── Send hero SVG clock — scale down on mobile ─── */
+@media (max-width: 900px) {
+  .send-hero-photo svg {
+    width: 200px !important;
+    height: 200px !important;
+  }
+  .send-hero-photo {
+    padding: 20px 16px !important;
+  }
+}
+@media (max-width: 480px) {
+  .send-hero-photo svg {
+    width: 160px !important;
+    height: 160px !important;
+  }
+}
+
+/* ─── Pricing table overflow ─── */
+@media (max-width: 600px) {
+  .pickup-price-table {
+    font-size: 12px;
+  }
+  .pickup-price-table th,
+  .pickup-price-table td {
+    padding: 10px 10px;
+  }
+}
+
+/* ─── Step 3 tier options — stack on small screens ─── */
+@media (max-width: 480px) {
+  /* Tier radio labels should take full width */
+  .d-flex.gap-2.flex-wrap label[style*='min-width:160px'] {
+    min-width: 100% !important;
+    width: 100%;
+  }
+  /* Date chips wrap but don't squish */
+  .date-chip {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.65rem;
+  }
+}
+.gs-footer .footer-links a {
+  display: block;
+  line-height: 2;
+}
+
+/* ================================================================
+   ADMIN AREA
+   ================================================================ */
+.admin-header {
+  background: var(--gs-bog);
+  color: var(--gs-cream);
+  padding: 0.75rem 1.5rem;
+}
+.admin-sidebar .nav-link {
+  color: var(--gs-ink);
+  padding: 0.5rem 1rem;
+  border-radius: var(--r-sm);
+  font-size: 0.9rem;
+}
+.admin-sidebar .nav-link:hover  { background: var(--gs-cream); }
+.admin-sidebar .nav-link.active { background: var(--gs-bog); color: var(--gs-cream) !important; }
+
+/* ================================================================
+   DIASPORA PAGE
+   ================================================================ */
+.diaspora-hero {
+  background: linear-gradient(135deg, var(--gs-bog) 0%, #2d5040 100%);
+  color: var(--gs-cream);
+  padding: 5rem 0;
+}
+.tz-converter {
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--r-md);
+  padding: 1.5rem;
+}
+.tz-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  font-size: 0.9rem;
+}
+.tz-row:last-child { border-bottom: none; }
+.gift-card {
+  background: white;
+  border: 1.5px solid var(--gs-mist);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.gift-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+}
+
+/* ================================================================
+   SCROLL NAV EFFECT (JS adds .scrolled class)
+   ================================================================ */

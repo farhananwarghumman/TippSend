@@ -1,0 +1,31 @@
+@page
+@model PaymentReturnModel
+@{
+    ViewData["Title"] = "Processing payment…";
+}
+
+<div class="py-5 text-center" style="background:var(--gs-paper);min-height:80vh">
+    <div class="container" style="max-width:480px;padding-top:80px">
+        @if (Model.Failed)
+        {
+            <div style="font-size:2.5rem;margin-bottom:1rem">⚠️</div>
+            <h2 class="mb-3" style="font-family:'Newsreader',serif;font-weight:400;color:var(--gs-bog)">Payment not completed</h2>
+            <p class="text-muted mb-4">Your card was not charged. You can go back and try again.</p>
+            <a asp-page="Step4" class="btn btn-gold btn-lg px-5">← Back to summary</a>
+        }
+        else if (Model.AlreadyProcessed)
+        {
+            <div style="font-size:2.5rem;margin-bottom:1rem">✓</div>
+            <h2 class="mb-3" style="font-family:'Newsreader',serif;font-weight:400;color:var(--gs-bog)">Already confirmed</h2>
+            <p class="text-muted mb-4">This order has already been placed. Check your email for confirmation.</p>
+            <a asp-page="/Index" class="btn btn-gold btn-lg px-5">Home</a>
+        }
+        else
+        {
+            <div class="spinner-border text-secondary mb-4" role="status" style="width:2.5rem;height:2.5rem">
+                <span class="visually-hidden">Processing…</span>
+            </div>
+            <h2 style="font-family:'Newsreader',serif;font-weight:400;color:var(--gs-bog)">Confirming your order…</h2>
+        }
+    </div>
+</div>

@@ -1,0 +1,77 @@
+@page
+@model TippSendApp.Pages.Admin.Shops.IndexModel
+@{
+    ViewData["Title"] = "Shops";
+}
+
+<div class="admin-header">
+    <div class="container-fluid d-flex align-items-center gap-3">
+        <a asp-page="/Admin/Index" style="color:var(--gs-fog);text-decoration:none">← Admin</a>
+        <span class="footer-brand" style="font-size:1.1rem">Shops</span>
+    </div>
+</div>
+
+<div class="container-fluid py-3" style="max-width:1100px">
+
+    <!-- ADD FORM -->
+    <div class="card mb-4">
+        <div class="card-header fw-semibold" style="background:var(--gs-paper)">Add shop</div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="Create">
+                <div class="row g-2">
+                    <div class="col-md-3"><input asp-for="NewShop.Name" class="form-control" placeholder="Shop name *" /></div>
+                    <div class="col-md-3"><input asp-for="NewShop.Address" class="form-control" placeholder="Address *" /></div>
+                    <div class="col-md-2">
+                        <select asp-for="NewShop.Town" class="form-select">
+                            <option value="">Town *</option>
+                            @foreach (var t in TippSendApp.Pages.Book.Step2Model.IrishTowns)
+                            { <option>@t</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-2"><input asp-for="NewShop.OpeningHours" class="form-control" placeholder="Opening hours" /></div>
+                    <div class="col-md-2"><input asp-for="NewShop.ContactPhone" class="form-control" placeholder="Phone" /></div>
+                    <div class="col-md-4"><input asp-for="NewShop.PaymentNotes" class="form-control" placeholder="Payment notes" /></div>
+                    <div class="col-auto"><button class="btn btn-gold">Add shop</button></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SHOP TABLE -->
+    <div class="table-responsive">
+        <table class="table table-hover table-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th><th>Town</th><th>Address</th><th>Hours</th>
+                    <th>Phone</th><th>Payment</th><th>Active</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var shop in Model.Shops)
+                {
+                    <tr class="@(!shop.IsActive ? "table-secondary" : "")">
+                        <td class="fw-semibold small">@shop.Name</td>
+                        <td class="small">@shop.Town</td>
+                        <td class="small">@shop.Address</td>
+                        <td class="small">@shop.OpeningHours</td>
+                        <td class="small">@shop.ContactPhone</td>
+                        <td class="small">@shop.PaymentNotes</td>
+                        <td>
+                            <form method="post" asp-page-handler="Toggle" asp-route-id="@shop.Id">
+                                <button class="btn btn-sm @(shop.IsActive ? "btn-success" : "btn-secondary")">
+                                    @(shop.IsActive ? "Active" : "Inactive")
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@shop.Id"
+                                  onsubmit="return confirm('Delete @shop.Name?')">
+                                <button class="btn btn-outline-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
