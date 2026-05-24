@@ -9,17 +9,20 @@ public class OrderService
     private readonly PricingService _pricing;
     private readonly EmailService _email;
     private readonly WhatsAppService _whatsApp;
+    private readonly ILogger<OrderService> _logger;
 
     public OrderService(
         ApplicationDbContext db,
         PricingService pricing,
         EmailService email,
-        WhatsAppService whatsApp)
+        WhatsAppService whatsApp,
+        ILogger<OrderService> logger)
     {
         _db = db;
         _pricing = pricing;
         _email = email;
         _whatsApp = whatsApp;
+        _logger = logger;
     }
 
     public async Task<Order> CreateFromSessionAsync(BookingSession session)
@@ -69,8 +72,15 @@ public class OrderService
         // Fire notifications non-blocking — never let a notification failure break the order flow
         _ = Task.Run(async () =>
         {
-            await _email.SendOrderConfirmationAsync(order);
-            await _whatsApp.SendOrderConfirmedAsync(order);
+            try
+            {
+                await _email.SendOrderConfirmationAsync(order);
+                await _whatsApp.SendOrderConfirmedAsync(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Notification failed for order {Reference}", order.Reference);
+            }
         });
 
         return order;
@@ -102,22 +112,29 @@ public class OrderService
 
         await _db.SaveChangesAsync();
 
-        // Fire WhatsApp notification for the new status
+        // Fire notifications for the new status non-blocking
         _ = Task.Run(async () =>
         {
-            switch (newStatus)
+            try
             {
-                case OrderStatus.Collected:
-                    await _whatsApp.SendCollectedAsync(order);
-                    await _email.SendStatusUpdateAsync(order, "Item collected — on the way.");
-                    break;
-                case OrderStatus.InTransit:
-                    await _whatsApp.SendOutForDeliveryAsync(order);
-                    break;
-                case OrderStatus.Delivered:
-                    await _whatsApp.SendDeliveredAsync(order);
-                    await _email.SendStatusUpdateAsync(order, $"Delivered to {order.RecipientName} ✓");
-                    break;
+                switch (newStatus)
+                {
+                    case OrderStatus.Collected:
+                        await _whatsApp.SendCollectedAsync(order);
+                        await _email.SendStatusUpdateAsync(order, "Item collected — on the way.");
+                        break;
+                    case OrderStatus.InTransit:
+                        await _whatsApp.SendOutForDeliveryAsync(order);
+                        break;
+                    case OrderStatus.Delivered:
+                        await _whatsApp.SendDeliveredAsync(order);
+                        await _email.SendStatusUpdateAsync(order, $"Delivered to {order.RecipientName} ✓");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Status notification failed for order {Reference} → {Status}", order.Reference, newStatus);
             }
         });
     }
@@ -151,13 +168,17 @@ public class OrderService
             CreatedAt           = DateTime.UtcNow
         };
 
-        order.Reference = $"TS·{deliveryDate:ddMMyy}·PD";
+        order.Reference = GenerateReference(order);
         _db.Orders.Add(order);
         await _db.SaveChangesAsync();
         return order;
     }
 
-    private static string GenerateReference(Order o) => o.OrderType == OrderType.PickupDrop
-        ? $"TS·{o.DeliveryDate:ddMMyy}·PD"
-        : $"TS·{o.DeliveryDate:ddMMyy}·{o.TierCode}·{o.Zone}";
+    private static string GenerateReference(Order o)
+    {
+        var suffix = Guid.NewGuid().ToString("N")[..4].ToUpper();
+        return o.OrderType == OrderType.PickupDrop
+            ? $"TS·{o.DeliveryDate:ddMMyy}·PD·{suffix}"
+            : $"TS·{o.DeliveryDate:ddMMyy}·{o.TierCode}·{o.Zone}·{suffix}";
+    }
 }

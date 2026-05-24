@@ -46,9 +46,10 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout      = TimeSpan.FromMinutes(60);
-    options.Cookie.HttpOnly  = true;
-    options.Cookie.IsEssential = true;
+    options.IdleTimeout             = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly         = true;
+    options.Cookie.IsEssential      = true;
+    options.Cookie.SecurePolicy     = CookieSecurePolicy.Always;
 });
 
 // ── HTTP clients (Resend, WhatsApp) ───────────────────────────────────────────
@@ -77,12 +78,17 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseSession();
 app.MapRazorPages();
 
 // ── Stripe webhook (minimal API — bypasses Razor Pages anti-forgery) ──────────
+// Set Stripe API key once at startup
+var stripeKey = builder.Configuration["Stripe:SecretKey"];
+if (!string.IsNullOrWhiteSpace(stripeKey))
+    StripeConfiguration.ApiKey = stripeKey;
+
 app.MapPost("/webhooks/stripe", async (HttpContext ctx) =>
 {
     var config        = ctx.RequestServices.GetRequiredService<IConfiguration>();

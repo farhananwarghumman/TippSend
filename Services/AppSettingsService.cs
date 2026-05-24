@@ -4,7 +4,7 @@ namespace TippSendApp.Services;
 
 public class RuntimeSettings
 {
-    public bool OperatingAllDays { get; set; } = true;
+    public bool OperatingAllDays { get; set; } = false;
     public int MinBookingNoticeHours { get; set; } = 2;
 }
 

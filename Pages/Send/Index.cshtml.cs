@@ -92,7 +92,7 @@ public class IndexModel : PageModel
 
         if (!ModelState.IsValid) return Page();
 
-        var price = CalculatePrice(PickupZone, DropoffZone, PreferredDate, PreferredTime);
+        var price = CalculatePrice(PickupZone, DropoffZone);
 
         var booking = new PickupDropBooking
         {
@@ -145,19 +145,11 @@ public class IndexModel : PageModel
         return RedirectToPage("/Index");
     }
 
-    public static decimal CalculatePrice(string pickupZone, string dropoffZone, string date, string time)
+    public static decimal CalculatePrice(string pickupZone, string dropoffZone)
     {
-        decimal basePrice = pickupZone == dropoffZone
-            ? pickupZone switch { "A" => 6, "B" => 10, "C" => 14, _ => 12 }
-            : 12;
-
-        decimal surcharge = 0;
-        if (DateTime.TryParse(date, out var d) && d.DayOfWeek == DayOfWeek.Sunday)
-            surcharge = 5;
-        else if (TimeSpan.TryParse(time, out var t) && t.Hours >= 18)
-            surcharge = 5;
-
-        return basePrice + surcharge;
+        return pickupZone == dropoffZone
+            ? pickupZone switch { "A" => 6m, "B" => 10m, "C" => 14m, _ => 12m }
+            : 12m;
     }
 
     public static async Task SendNotificationEmailAsync(PickupDropBooking b, EmailService email)

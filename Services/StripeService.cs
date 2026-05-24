@@ -11,9 +11,6 @@ public class StripeService
     public StripeService(IConfiguration config)
     {
         _config = config;
-        var key = config["Stripe:SecretKey"];
-        if (!string.IsNullOrWhiteSpace(key))
-            StripeConfiguration.ApiKey = key;
     }
 
     public bool IsConfigured => !string.IsNullOrWhiteSpace(_config["Stripe:SecretKey"]);
@@ -38,7 +35,7 @@ public class StripeService
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
                         Name = booking.ItemDescription,
-                        Description = $"Item + 8% sourcing fee"
+                        Description = $"Item + sourcing fee"
                     }
                 },
                 Quantity = 1

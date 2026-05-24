@@ -43,6 +43,10 @@ public class ApplicationDbContext : IdentityDbContext
         builder.Entity<B2BAccount>()
             .Property(b => b.PerDeliveryRate).HasColumnType("decimal(10,2)");
 
+        builder.Entity<Order>().HasIndex(o => o.TrackingToken).IsUnique();
+        builder.Entity<Order>().HasIndex(o => o.DeliveryDate);
+        builder.Entity<Order>().HasIndex(o => o.Status);
+
         SeedData(builder);
     }
 

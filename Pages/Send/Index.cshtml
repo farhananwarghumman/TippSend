@@ -412,6 +412,11 @@ body { background: var(--gs-cream); }
                     <form method="post" id="sendForm">
                         @Html.AntiForgeryToken()
 
+                        <!-- Collection note -->
+                        <div style="background:rgba(201,162,75,0.08);border:1px solid rgba(201,162,75,0.22);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:var(--gs-bog-deep);margin-bottom:20px;line-height:1.5">
+                            ℹ️ <strong>The item must already be purchased and ready for collection.</strong> We collect and deliver — we don't handle payments between buyer and seller.
+                        </div>
+
                         <!-- PICKUP -->
                         <div class="send-section-label">Pickup location</div>
                         <div class="row g-3 mb-4">
@@ -483,7 +488,7 @@ body { background: var(--gs-cream); }
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="PreferredTime" class="form-label">Preferred time</label>
-                                <input asp-for="PreferredTime" type="time" id="preferredTime" min="07:00" max="21:00" onchange="calcPrice()" />
+                                <input asp-for="PreferredTime" type="time" id="preferredTime" min="09:00" max="21:00" onchange="calcPrice()" />
                                 <span asp-validation-for="PreferredTime" class="text-danger"></span>
                             </div>
                         </div>
@@ -494,17 +499,12 @@ body { background: var(--gs-cream); }
                             &nbsp;·&nbsp;
                             @if (Model.OperatingAllDays)
                             {
-                                <span>Operating Monday–Sunday 10am–6pm.</span>
+                                <span>Operating Monday–Sunday 9am–9pm.</span>
                             }
                             else
                             {
-                                <span>Operating <strong>Saturday and Sunday</strong> only, 10am–6pm.</span>
+                                <span>Operating <strong>Saturday and Sunday</strong> only, 9am–9pm.</span>
                             }
-                        </div>
-
-                        <!-- Dynamic surcharge warning — toggled by JS when evening or Sunday is selected -->
-                        <div id="surchargeAlert" role="alert" style="display:none;background:rgba(156,42,26,0.07);border:1px solid rgba(156,42,26,0.25);border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:var(--gs-bog-deep);margin-bottom:6px">
-                            <strong style="color:var(--gs-claret)">+€5 surcharge applies</strong> — <span id="surchargeAlertReason"></span> deliveries carry a small premium, reflected in your total on the right.
                         </div>
 
                         <!-- CONTACT -->
@@ -572,8 +572,7 @@ body { background: var(--gs-cream); }
                         <div class="price-card-head__note" id="priceNote">Enter both addresses to see price</div>
                     </div>
                     <div class="price-card-body" id="priceBreakdown" style="display:none">
-                        <div class="price-card-row"><span>Base rate</span><span id="baseDisplay">—</span></div>
-                        <div class="price-card-row" id="surchargeRow" style="display:none"><span id="surchargeLabel">Surcharge</span><span>+€5</span></div>
+                        <div class="price-card-row"><span>Flat rate</span><span id="baseDisplay">—</span></div>
                     </div>
                 </div>
 
@@ -636,12 +635,11 @@ body { background: var(--gs-cream); }
                     <tr><td>Mid Tipperary</td><td>Cahir, Fethard, Carrick-on-Suir, Kilsheelan, Ardfinnan, Newcastle</td><td style="text-align:right">€10</td></tr>
                     <tr><td>Outer Tipperary</td><td>Cashel, Clogheen, Killenaule, Mullinahone</td><td style="text-align:right">€14</td></tr>
                     <tr><td>Between areas</td><td>Pickup and drop in different areas — e.g. Clonmel to Cahir</td><td style="text-align:right">€12</td></tr>
-                    <tr><td>Evening / Sunday</td><td>After 6pm or any Sunday</td><td style="text-align:right">+€5</td></tr>
                 </tbody>
             </table>
         </div>
         <p data-anim style="--anim-delay:0.18s;font-size:12px;color:var(--gs-fog);margin-top:16px">
-            Items must fit in a standard car boot (max 60 kg · max 120×60×60 cm). By booking you confirm your item fits within these limits.
+            Flat rates, no surcharges. Operating Saturday &amp; Sunday, 9am–9pm. Items must fit in a standard car boot (max 60 kg · max 120×60×60 cm).
         </p>
     </div>
 </section>
@@ -652,7 +650,6 @@ body { background: var(--gs-cream); }
 (function () {
     var PRICES = { A: 6, B: 10, C: 14 };
     var CROSS_ZONE = 12;
-    var SURCHARGE = 5;
     var MIN_NOTICE_HOURS = @Model.MinBookingNoticeHours;
     var OPERATING_ALL_DAYS = @(Model.OperatingAllDays ? "true" : "false");
 
@@ -672,7 +669,7 @@ body { background: var(--gs-cream); }
     // Keep time min in sync with selected date
     function updateTimeMin(dateVal) {
         var timeInput = document.getElementById('preferredTime');
-        if (!dateVal) { timeInput.min = '07:00'; return; }
+        if (!dateVal) { timeInput.min = '09:00'; return; }
         var today = new Date();
         var sel   = new Date(dateVal + 'T00:00:00');
         var isToday = sel.getFullYear() === today.getFullYear() &&
@@ -690,7 +687,7 @@ body { background: var(--gs-cream); }
             if (timeInput.value && timeInput.value < timeInput.min)
                 timeInput.value = '';
         } else {
-            timeInput.min = '07:00';
+            timeInput.min = '09:00';
         }
     }
 
@@ -700,7 +697,7 @@ body { background: var(--gs-cream); }
             var d = new Date(this.value + 'T00:00:00');
             var dow = d.getDay(); // 0=Sun, 6=Sat
             if (dow !== 0 && dow !== 6) {
-                alert('We currently operate Saturday and Sunday only. Please choose a weekend date.');
+                alert('We operate Saturday and Sunday only (9am–9pm). Please choose a weekend date.');
                 this.value = '';
                 calcPrice();
                 return;
@@ -711,40 +708,14 @@ body { background: var(--gs-cream); }
     });
 
     function calcPrice() {
-        var pz   = document.getElementById('pickupZone').value;
-        var dz   = document.getElementById('dropoffZone').value;
-        var date = document.getElementById('preferredDate').value;
-        var time = document.getElementById('preferredTime').value;
+        var pz  = document.getElementById('pickupZone').value;
+        var dz  = document.getElementById('dropoffZone').value;
 
-        var display      = document.getElementById('priceDisplay');
-        var note         = document.getElementById('priceNote');
-        var breakdown    = document.getElementById('priceBreakdown');
-        var baseEl       = document.getElementById('baseDisplay');
-        var sRow         = document.getElementById('surchargeRow');
-        var sLabel       = document.getElementById('surchargeLabel');
-        var btn          = document.getElementById('submitBtn');
-        var inlineAlert  = document.getElementById('surchargeAlert');
-        var alertReason  = document.getElementById('surchargeAlertReason');
-
-        // Always calculate surcharge from date/time — independent of zone selection
-        var surcharge = 0, surchargeReason = '';
-        if (date) {
-            var d = new Date(date + 'T00:00:00');
-            if (d.getDay() === 0) { surcharge = SURCHARGE; surchargeReason = 'Sunday surcharge'; }
-        }
-        if (!surchargeReason && time) {
-            if (parseInt(time.split(':')[0], 10) >= 18) { surcharge = SURCHARGE; surchargeReason = 'Evening surcharge'; }
-        }
-
-        // Show inline surcharge alert as soon as date/time is picked, regardless of zones
-        if (inlineAlert) {
-            if (surcharge > 0) {
-                inlineAlert.style.display = '';
-                if (alertReason) alertReason.textContent = surchargeReason === 'Sunday surcharge' ? 'Sunday' : 'evening (after 6 pm)';
-            } else {
-                inlineAlert.style.display = 'none';
-            }
-        }
+        var display   = document.getElementById('priceDisplay');
+        var note      = document.getElementById('priceNote');
+        var breakdown = document.getElementById('priceBreakdown');
+        var baseEl    = document.getElementById('baseDisplay');
+        var btn       = document.getElementById('submitBtn');
 
         if (!pz || !dz) {
             display.textContent     = '—';
@@ -755,22 +726,13 @@ body { background: var(--gs-cream); }
             return;
         }
 
-        var base = (pz === dz) ? PRICES[pz] : CROSS_ZONE;
-        var baseLabel = pz === dz ? 'Zone ' + pz + ' flat rate' : 'Cross-zone rate';
-
-        var total = base + surcharge;
-        display.textContent     = '€' + total;
-        note.textContent        = baseLabel;
+        var price = (pz === dz) ? PRICES[pz] : CROSS_ZONE;
+        display.textContent     = '€' + price;
+        note.textContent        = 'Flat rate — no surcharges';
         breakdown.style.display = '';
-        baseEl.textContent      = '€' + base;
-        if (surcharge > 0) {
-            sRow.style.display = '';
-            sLabel.textContent = surchargeReason;
-        } else {
-            sRow.style.display = 'none';
-        }
+        baseEl.textContent      = '€' + price;
         btn.disabled    = false;
-        btn.textContent = 'Book & pay €' + total + ' →';
+        btn.textContent = 'Book & pay €' + price + ' →';
     }
 
     // ── Eircode routing key map ──
