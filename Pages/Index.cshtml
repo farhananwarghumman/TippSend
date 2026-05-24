@@ -267,6 +267,19 @@ body { background: var(--gs-cream); }
     </section>
 </section>
 
+<!-- ═══ COVERAGE STRIP ══════════════════════════════════════════ -->
+<div style="background:var(--gs-paper);border-top:1px solid var(--gs-mist);border-bottom:1px solid var(--gs-mist);padding:14px 0">
+    <div class="container-xl">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px">
+            <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gs-stone);flex-shrink:0">We deliver to</span>
+            @foreach (var town in new[]{"Clonmel","Cahir","Fethard","Carrick-on-Suir","Kilsheelan","Ardfinnan","Newcastle","Cashel","Clogheen","Killenaule","Mullinahone"})
+            {
+                <span style="font-size:12px;font-weight:600;color:var(--gs-bog-deep);background:var(--gs-cream);border:1.5px solid var(--gs-mist);border-radius:var(--r-pill);padding:3px 12px">@town</span>
+            }
+        </div>
+    </div>
+</div>
+
 <!-- ═══ STATS BAR ════════════════════════════════════════════════ -->
 <div class="stats-bar" data-anim style="--anim-delay:0.1s">
     <div class="stat-cell">
