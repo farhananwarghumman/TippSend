@@ -27,6 +27,7 @@ jobs:
       BootstrapAdmin__Email: admin@example.invalid
       BootstrapAdmin__SetupToken: disposable-ci-setup-token
       BootstrapAdmin__SetupExpiresAt: '2099-01-01T00:00:00Z'
+      Stripe__WebhookSecret: whsec_disposable_ci
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -59,6 +60,7 @@ jobs:
           test "$(curl --silent -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' http://127.0.0.1:8080/Admin)" = '302'
           test "$(curl --silent -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' http://127.0.0.1:8080/Identity/Account/Register)" = '404'
           test "$(curl --silent -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' -X POST http://127.0.0.1:8080/Send)" = '400'
+          test "$(curl --silent -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:8080/webhooks/stripe)" = '400'
       - name: Verify public request and admin workflow
         run: python3 tests/http_workflow.py
       - name: Build Linux container

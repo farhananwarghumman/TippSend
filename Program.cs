@@ -153,6 +153,7 @@ app.MapPost("/webhooks/stripe", async (HttpContext ctx) =>
     var config        = ctx.RequestServices.GetRequiredService<IConfiguration>();
     var webhookSecret = config["Stripe:WebhookSecret"];
     if (string.IsNullOrWhiteSpace(webhookSecret)) return Results.StatusCode(503);
+    if (string.IsNullOrWhiteSpace(ctx.Request.Headers["Stripe-Signature"])) return Results.BadRequest();
 
     string json;
     using (var reader = new StreamReader(ctx.Request.Body))
@@ -167,7 +168,7 @@ app.MapPost("/webhooks/stripe", async (HttpContext ctx) =>
             webhookSecret,
             throwOnApiVersionMismatch: false);
     }
-    catch (StripeException ex)
+    catch (Exception ex) when (ex is StripeException or ArgumentException or System.Text.Json.JsonException)
     {
         ctx.RequestServices.GetRequiredService<ILogger<Program>>()
             .LogWarning("Stripe signature failed: {Msg}", ex.Message);
