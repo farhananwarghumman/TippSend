@@ -1,17 +1,20 @@
 using System.Text.Json;
+using System.ComponentModel.DataAnnotations;
 using TippSendApp.Models;
 namespace TippSendApp.Services;
-// Pilot store: one application process; separate from paid orders and never served as static content.
+
 public class PilotService
 {
     private readonly object _gate = new();
     private readonly string _path;
+    private readonly OperationalStore? _store;
     public bool Preview { get; }
     public static DateTime IrishNow => TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, OperatingSystem.IsWindows() ? "GMT Standard Time" : "Europe/Dublin");
-    private class State { public List<PilotRoute> Routes { get; set; } = new(); public List<PilotRequest> Requests { get; set; } = new(); }
-    public PilotService(IConfiguration config, IWebHostEnvironment env)
+    public class State { public List<PilotRoute> Routes { get; set; } = new(); public List<PilotRequest> Requests { get; set; } = new(); }
+    public PilotService(IConfiguration config, IWebHostEnvironment env, OperationalStore? store = null)
     {
         Preview = env.IsDevelopment() && config.GetValue<bool>("LocalPreview");
+        _store = Preview ? null : store;
         _path = Path.Combine(config["PilotDataDir"] ?? config["AppSettingsDir"] ?? env.ContentRootPath, "App_Data", Preview ? "pilot-preview.json" : "pilot.json");
     }
     private State Read()
@@ -26,27 +29,49 @@ public class PilotService
         }
         return state;
     }
-    private void Save(State state) {
-        Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
-        var temporary = _path + ".tmp";
-        File.WriteAllText(temporary, JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented=true }));
-        File.Move(temporary, _path, true);
-    }
-    public List<PilotRoute> Routes(bool availableOnly=true) { lock(_gate) { var s=Read(); return s.Routes.Where(r=>!availableOnly || r.Open && r.Cutoff>IrishNow && s.Requests.Count(x=>x.RouteId==r.Id && x.Status!="Cancelled")<r.Capacity).OrderBy(r=>r.DepartureDate).ToList(); } }
-    public List<PilotRequest> Requests() { lock(_gate) return Read().Requests.OrderByDescending(r=>r.CreatedAt).ToList(); }
-    public string Submit(PilotRequest request) {
-        lock(_gate) {
-            var s=Read();
-            if(request.Service=="Scheduled") {
-                var route=s.Routes.FirstOrDefault(r=>r.Id==request.RouteId);
-                if(route is null || !route.Open || route.Cutoff<=IrishNow || s.Requests.Count(x=>x.RouteId==route.Id && x.Status!="Cancelled")>=route.Capacity) throw new InvalidOperationException("This departure is no longer available. Choose another run or request a dedicated quote.");
-                request.PreferredDate=route.DepartureDate; request.PreferredTime=route.Window; request.QuotedPrice=route.Price;
-            } else { request.RouteId=null; request.QuotedPrice=null; if(request.PreferredDate.Date<IrishNow.Date || request.PreferredDate.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday)) throw new InvalidOperationException("Choose a future Saturday or Sunday during the weekend pilot."); }
-            request.Reference="TS-R-"+Guid.NewGuid().ToString("N")[..10].ToUpperInvariant(); request.Status="Requested"; request.CreatedAt=DateTime.UtcNow;
-            s.Requests.Add(request); Save(s); return request.Reference;
+    private T Execute<T>(Func<State,T> operation, bool write = false)
+    {
+        if (_store is not null) return _store.Execute("pilot", Read, operation, write);
+        lock (_gate) {
+            var state = Read(); var result = operation(state);
+            if (write) {
+                Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
+                File.WriteAllText(_path + ".tmp", JsonSerializer.Serialize(state));
+                File.Move(_path + ".tmp", _path, true);
+            }
+            return result;
         }
     }
-    public void AddRoute(PilotRoute route) { lock(_gate) { if(route.Cutoff<=IrishNow || route.Cutoff>route.DepartureDate.AddDays(1) || route.DepartureDate.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday)) throw new InvalidOperationException("Publish a future weekend run with a valid cutoff."); var s=Read(); route.Id=Guid.NewGuid().ToString("N"); s.Routes.Add(route); Save(s); } }
-    public void CloseRoute(string id) { lock(_gate) { var s=Read(); var r=s.Routes.FirstOrDefault(x=>x.Id==id); if(r is not null) r.Open=false; Save(s); } }
-    public void UpdateRequest(string reference,string status,decimal? price) { lock(_gate) { if(!new[]{"Requested","Quoted","Accepted","Completed","Cancelled"}.Contains(status)) throw new InvalidOperationException("Invalid status."); if(price is <0 or >10000) throw new InvalidOperationException("Enter a valid quote."); var s=Read(); var r=s.Requests.Single(x=>x.Reference==reference); if(status is "Quoted" or "Accepted" && !(price>0)) throw new InvalidOperationException("A positive agreed price is required."); r.Status=status; r.QuotedPrice=price; Save(s); } }
+    public List<PilotRoute> Routes(bool availableOnly=true) => Execute(s => s.Routes.Where(r=>!availableOnly || r.Open && r.Cutoff>IrishNow && s.Requests.Count(x=>x.RouteId==r.Id && x.Status!="Cancelled")<r.Capacity).OrderBy(r=>r.DepartureDate).ToList());
+    public List<PilotRequest> Requests() => Execute(s=>s.Requests.OrderByDescending(r=>r.CreatedAt).ToList());
+    public PilotRequest? Find(string token) => Execute(s=>s.Requests.SingleOrDefault(r=>r.TrackingToken==token));
+    public string Submit(PilotRequest request) => Execute(s => {
+        if(request.Service=="Scheduled" && string.IsNullOrWhiteSpace(request.PreferredTime)) request.PreferredTime="Confirmed run window";
+        Validator.ValidateObject(request, new ValidationContext(request), true);
+        if(request.Service=="Scheduled") {
+            var route=s.Routes.FirstOrDefault(r=>r.Id==request.RouteId);
+            if(route is null || !route.Open || route.Cutoff<=IrishNow || s.Requests.Count(x=>x.RouteId==route.Id && x.Status!="Cancelled")>=route.Capacity) throw new InvalidOperationException("This departure is no longer available. Choose another run or request a dedicated quote.");
+            request.PreferredDate=route.DepartureDate; request.PreferredTime=route.Window; request.QuotedPrice=route.Price;
+        } else {
+            request.RouteId=null; request.QuotedPrice=null;
+            if(request.PreferredDate.Date<IrishNow.Date || request.PreferredDate.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday)) throw new InvalidOperationException("Choose a future Saturday or Sunday during the weekend pilot.");
+        }
+        request.Reference="TS-R-"+Guid.NewGuid().ToString("N")[..10].ToUpperInvariant();
+        request.TrackingToken=Guid.NewGuid().ToString("N"); request.Status="Requested"; request.CreatedAt=DateTime.UtcNow;
+        s.Requests.Add(request); return request.Reference;
+    }, true);
+    public void AddRoute(PilotRoute route) => Execute(s => {
+        Validator.ValidateObject(route, new ValidationContext(route), true);
+        if(route.Cutoff<=IrishNow || route.Cutoff>route.DepartureDate.AddDays(1) || route.DepartureDate.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday)) throw new InvalidOperationException("Publish a future weekend run with a valid cutoff.");
+        route.Id=Guid.NewGuid().ToString("N"); s.Routes.Add(route); return true;
+    }, true);
+    public void CloseRoute(string id) => Execute(s=> { var route=s.Routes.FirstOrDefault(x=>x.Id==id); if(route is not null) route.Open=false; return true; },true);
+    public void UpdateRequest(string reference,string status,decimal? price) => Execute(s=> {
+        if(!new[]{"Requested","Quoted","Accepted","Completed","Cancelled"}.Contains(status)) throw new InvalidOperationException("Invalid status.");
+        if(price is <0 or >10000) throw new InvalidOperationException("Enter a valid quote.");
+        var r=s.Requests.SingleOrDefault(x=>x.Reference==reference) ?? throw new InvalidOperationException("Request not found.");
+        if(status is "Quoted" or "Accepted" && !(price>0)) throw new InvalidOperationException("A positive agreed price is required.");
+        if(r.Status=="Completed" && status!="Completed") throw new InvalidOperationException("A completed delivery cannot be reopened here.");
+        r.Status=status; r.QuotedPrice=price; return true;
+    },true);
 }

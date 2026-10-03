@@ -13,7 +13,7 @@ public class SettingsModel : PageModel
     public SettingsModel(AppSettingsService settings) => _settings = settings;
 
     [BindProperty] public bool OperatingAllDays { get; set; }
-    [BindProperty] public int MinBookingNoticeHours { get; set; }
+    [BindProperty, System.ComponentModel.DataAnnotations.Range(0,168)] public int MinBookingNoticeHours { get; set; }
 
     public void OnGet()
     {
@@ -24,6 +24,7 @@ public class SettingsModel : PageModel
 
     public IActionResult OnPost()
     {
+        if(!ModelState.IsValid)return Page();
         _settings.Save(new RuntimeSettings
         {
             OperatingAllDays = OperatingAllDays,

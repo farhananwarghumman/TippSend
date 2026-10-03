@@ -9,8 +9,8 @@
     <div class="container-xl">
         <div style="max-width:560px;margin:0 auto">
             <div style="font-size:3rem;margin-bottom:1rem">✓</div>
-            <h2 class="mb-2">Your order is confirmed</h2>
-            <p class="text-muted mb-4">We'll start preparing everything — you'll hear from us on WhatsApp shortly.</p>
+            <h2 class="mb-2">@(o.PaymentIsTest ? "Test payment complete" : "Your delivery is confirmed")</h2>
+            <p class="text-muted mb-4">@(o.PaymentIsTest ? "This is a test booking. No real delivery has been arranged." : "Keep your tracking link to follow collection and delivery updates.")</p>
 
             <div class="mb-4">
                 <div class="text-muted small mb-1">Order reference</div>
@@ -32,15 +32,15 @@
                     <div class="timeline-dot"></div>
                     <div>
                         <div class="fw-semibold small">Order confirmed</div>
-                        <div class="text-muted" style="font-size:0.8rem">Within 30 minutes — we'll send a WhatsApp</div>
+                        <div class="text-muted" style="font-size:0.8rem">At the time agreed with TippSend</div>
                     </div>
                 </div>
                 <div class="timeline-step-line" style="margin-left:5px;height:20px;width:2px;background:var(--gs-fog)"></div>
                 <div class="timeline-step">
                     <div class="timeline-dot"></div>
                     <div>
-                        <div class="fw-semibold small">Item collected from @(o.Shop?.Name ?? "shop")</div>
-                        <div class="text-muted" style="font-size:0.8rem">We'll send a photo of the item</div>
+                        <div class="fw-semibold small">Item collected from your pickup address</div>
+                        <div class="text-muted" style="font-size:0.8rem">Your tracking page will show collection updates</div>
                     </div>
                 </div>
                 <div class="timeline-step-line" style="margin-left:5px;height:20px;width:2px;background:var(--gs-fog)"></div>

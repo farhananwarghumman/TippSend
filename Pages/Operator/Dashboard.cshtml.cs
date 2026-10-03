@@ -47,6 +47,8 @@ public class DashboardModel : PageModel
 
     public async Task<IActionResult> OnPostUpdateStatusAsync(int orderId)
     {
+        if(!ModelState.IsValid) { await LoadDataAsync();return Page(); }
+        try {
         string? photoPath = null;
         if (DeliveryPhoto is { Length: > 0 })
         {
@@ -55,6 +57,7 @@ public class DashboardModel : PageModel
         }
         await _orderService.UpdateStatusAsync(orderId, NewStatus, DriverNotes, photoPath, KmDriven);
         return RedirectToPage(new { SelectedOrderId = orderId, FilterType, ViewDateStr });
+        } catch(InvalidOperationException ex) { ModelState.AddModelError("",ex.Message);await LoadDataAsync();return Page(); }
     }
 
     private async Task LoadDataAsync()

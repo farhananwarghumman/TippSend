@@ -39,11 +39,11 @@ public class IndexModel : PageModel
         var monthStart = new DateTime(today.Year, today.Month, 1);
 
         RevenueThisWeek = await _db.Orders
-            .Where(o => o.Status == OrderStatus.Delivered && o.DeliveredAt >= weekStart)
+            .Where(o => !o.PaymentIsTest && o.Status == OrderStatus.Delivered && o.DeliveredAt >= weekStart)
             .SumAsync(o => (decimal?)o.Total) ?? 0;
 
         RevenueThisMonth = await _db.Orders
-            .Where(o => o.Status == OrderStatus.Delivered && o.DeliveredAt >= monthStart)
+            .Where(o => !o.PaymentIsTest && o.Status == OrderStatus.Delivered && o.DeliveredAt >= monthStart)
             .SumAsync(o => (decimal?)o.Total) ?? 0;
     }
 

@@ -1,0 +1,13 @@
+@page
+@model TippSendApp.Pages.SetupModel
+@{ViewData["Title"]="Set up your admin account";}
+<main id="main-content" class="pilot-wrap" style="max-width:560px;padding:48px 0 64px">
+<h1>Set up your admin account.</h1><p>This account manages TippSend deliveries.</p>
+<form method="post" class="pilot-panel pilot-form">
+<div asp-validation-summary="All" role="alert"></div><input type="hidden" asp-for="Token">
+<p>Admin email: <strong>@Model.Email</strong></p>
+<label asp-for="Password">Choose a password</label><input asp-for="Password" class="form-control" autocomplete="new-password"><span asp-validation-for="Password"></span>
+<p class="pilot-note">Use at least 12 characters. A unique password or passphrase is best.</p>
+<label asp-for="ConfirmPassword">Confirm password</label><input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password"><span asp-validation-for="ConfirmPassword"></span>
+<button class="pilot-button mt-3">Create admin account →</button>
+</form></main>

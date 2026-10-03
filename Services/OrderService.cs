@@ -25,7 +25,7 @@ public class OrderService
         _logger = logger;
     }
 
-    public async Task<Order> CreateFromSessionAsync(BookingSession session)
+    public async Task<Order> CreateFromSessionAsync(BookingSession session, bool notify = true)
     {
         var windowStart = new TimeSpan(session.DeliveryHour, session.DeliveryMinute, 0);
 
@@ -69,19 +69,7 @@ public class OrderService
         _db.Orders.Add(order);
         await _db.SaveChangesAsync();
 
-        // Fire notifications non-blocking — never let a notification failure break the order flow
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await _email.SendOrderConfirmationAsync(order);
-                await _whatsApp.SendOrderConfirmedAsync(order);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Notification failed for order {Reference}", order.Reference);
-            }
-        });
+        if (notify) await NotifyCreatedAsync(order);
 
         return order;
     }
@@ -96,6 +84,9 @@ public class OrderService
         var order = await _db.Orders.FindAsync(orderId)
             ?? throw new InvalidOperationException("Order not found");
 
+        if (!Enum.IsDefined(newStatus)) throw new InvalidOperationException("Invalid delivery status.");
+        if (kmDriven < 0) throw new InvalidOperationException("Distance cannot be negative.");
+        if (notes?.Length > 500) throw new InvalidOperationException("Keep notes within 500 characters.");
         order.Status = newStatus;
         if (notes is not null) order.DriverNotes = notes;
         if (photoPath is not null) order.DeliveryPhotoPath = photoPath;
@@ -112,33 +103,13 @@ public class OrderService
 
         await _db.SaveChangesAsync();
 
-        // Fire notifications for the new status non-blocking
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                switch (newStatus)
-                {
-                    case OrderStatus.Collected:
-                        await _whatsApp.SendCollectedAsync(order);
-                        await _email.SendStatusUpdateAsync(order, "Item collected — on the way.");
-                        break;
-                    case OrderStatus.InTransit:
-                        await _whatsApp.SendOutForDeliveryAsync(order);
-                        break;
-                    case OrderStatus.Delivered:
-                        await _whatsApp.SendDeliveredAsync(order);
-                        await _email.SendStatusUpdateAsync(order, $"Delivered to {order.RecipientName} ✓");
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Status notification failed for order {Reference} → {Status}", order.Reference, newStatus);
-            }
-        });
+        if (newStatus == OrderStatus.Collected)
+            await _email.SendStatusUpdateAsync(order, "Item collected — on the way.");
+        if (newStatus == OrderStatus.Delivered)
+            await _email.SendStatusUpdateAsync(order, "Your delivery is complete.");
     }
 
+    public Task NotifyCreatedAsync(Order order) => _email.SendOrderConfirmationAsync(order);
     public async Task<Order> CreateFromPickupDropAsync(PickupDropBooking b)
     {
         var deliveryDate = DateTime.TryParse(b.PreferredDate, out var d) ? d : DateTime.Today;
@@ -160,6 +131,7 @@ public class OrderService
             CardMessage         = b.SpecialInstructions,
             DeliveryDate        = deliveryDate,
             DeliveryWindowStart = windowStart,
+            AgreedDeliveryWindow = b.PreferredTime,
             Tier                = DeliveryTier.Standard,
             Zone                = PricingZone.A,
             Total               = b.Price,

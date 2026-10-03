@@ -18,9 +18,10 @@ public class IndexModel : PageModel
 
     [BindProperty] public int Rating { get; set; }
 
-    public async Task OnGetAsync()
+    public async Task<IActionResult> OnGetAsync()
     {
-        if (string.IsNullOrWhiteSpace(Token)) return;
+        Response.Headers.CacheControl="no-store";
+        if (string.IsNullOrWhiteSpace(Token)) return Page();
 
         Token = Token.Trim();
         if (Uri.TryCreate(Token, UriKind.Absolute, out var trackingUrl))
@@ -28,24 +29,26 @@ public class IndexModel : PageModel
         if (!System.Text.RegularExpressions.Regex.IsMatch(Token ?? "", "^[a-fA-F0-9]{32}$"))
         {
             ErrorMessage = "Enter the tracking code or link from your delivery confirmation. For a pending request, contact us with your request reference.";
-            return;
+            return Page();
         }
         if (_pilot.Preview)
         {
             ErrorMessage = "Live order tracking is not connected in this local preview.";
-            return;
+            return Page();
         }
         Order = await _db.Orders
             .Include(o => o.Shop)
             .FirstOrDefaultAsync(o => o.TrackingToken == Token);
 
+        if (Order is null && _pilot.Find(Token!) is not null) return RedirectToPage("/Send/Request",new {token=Token});
         if (Order is null) ErrorMessage = "Order not found. Please check your tracking link.";
+        return Page();
     }
 
     public async Task<IActionResult> OnPostRateAsync(string token, int rating)
     {
         var order = await _db.Orders.FirstOrDefaultAsync(o => o.TrackingToken == token);
-        if (order is not null && rating >= 1 && rating <= 5)
+        if (order is not null && order.Status==OrderStatus.Delivered && rating >= 1 && rating <= 5)
         {
             order.Rating = rating;
             await _db.SaveChangesAsync();

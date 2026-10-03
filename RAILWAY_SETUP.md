@@ -1,41 +1,39 @@
-# Railway deployment setup
+# TippSend launch setup
 
-This branch prepares the current website for PostgreSQL and Linux containers. No live Azure resources or data have been moved. New PostgreSQL databases are empty; fake merchants are not seeded.
+Production website and PostgreSQL run on Railway. Development and test databases run locally or in GitHub Actions; no paid Railway development environment is required.
 
-## Separate environments
+Railway deploys `main` after GitHub checks pass. Sleep mode is disabled by owner request. Hobby has a $5 minimum, including $5 of usage; actual usage and taxes may increase the bill. A $5 email alert is configured, not a $5 hard ceiling.
 
-- Production: GitHub `main`, ASPNETCORE_ENVIRONMENT=Production, its own PostgreSQL service and data volume, Stripe live credentials only after payment testing.
-- Development: GitHub `develop`, ASPNETCORE_ENVIRONMENT=Staging, its own PostgreSQL service and volume, Stripe test credentials only. Staging retains production error handling. Do not expose developer exception pages publicly.
-- Feature changes: `codex/*` branches and pull requests; require the build check before releasing to main.
-- Do not share database URLs, bootstrap passwords, volumes or Stripe webhook secrets between environments.
+## Required private variables
 
-## Railway services
+- `ConnectionStrings__DefaultConnection`: private Railway PostgreSQL connection, SSL required.
+- `ASPNETCORE_ENVIRONMENT=Production`, `ReverseProxy__Enabled=true`, port 8080.
+- `AppSettingsDir=/data`, `PilotDataDir=/data`, `UploadsDir=/data/uploads`, persistent web volume.
+- `PublicBaseUrl`: the current HTTPS website URL; switch to https://tippsend.ie after DNS and HTTPS verification.
+- `Notifications__OperatorEmail`: owner's receiving address. Never commit it to source.
+- `Resend__ApiKey`: sending-only key restricted to tippsend.ie; `Resend__FromAddress=orders@tippsend.ie`.
+- `Stripe__SecretKey`: sandbox/test key first.
+- `Stripe__WebhookSecret`: signing secret for `/webhooks/stripe`, checkout.session.completed and checkout.session.async_payment_succeeded.
+- Keep `Stripe__EnableLivePayments=false` until verified test checkout, operational policy and live Stripe account onboarding are complete.
 
-For each environment, provision an app and a PostgreSQL service using the supported template. Do not expose the database TCP proxy publicly. Mount an app volume at `/data` and database storage at the template's data directory. Use one app replica while file-backed pilot request storage remains in use.
+## First administrator
 
-Configure app variables in Railway, not GitHub source:
+Use `BootstrapAdmin__Email`, a random `BootstrapAdmin__SetupToken`, and `BootstrapAdmin__SetupExpiresAt` (UTC, at most 24 hours). Owner opens `/Setup?token=...` and chooses their own password. Setup creates an admin only if no admins exist, never promotes existing public users, and is protected by a transaction lock. Remove setup variables after creation. Public registration is disabled. Enable MFA through Identity account settings. Password resets need the email provider connected.
 
-```
-ASPNETCORE_ENVIRONMENT=Production
-ASPNETCORE_HTTP_PORTS=8080
-ReverseProxy__Enabled=true
-ConnectionStrings__DefaultConnection=Host=${{Postgres.PGHOST}};Port=${{Postgres.PGPORT}};Database=${{Postgres.PGDATABASE}};Username=${{Postgres.PGUSER}};Password=${{Postgres.PGPASSWORD}}
-PilotDataDir=/data
-AppSettingsDir=/data
-UploadsDir=/data/uploads
-```
+## Booking flow
 
-Use Staging for development. PostgreSQL service reference names must match the actual service name. The reverse proxy option trusts the Railway edge's forwarded HTTPS scheme; enable it only behind that edge, not on a directly exposed standalone server. The app listens on 8080. Use `/health` for the deployment healthcheck. Startup applies PostgreSQL migrations and stops if database initialization fails.
+Send an Item creates a delivery request and private link. Requests, routes, runtime settings and business enquiries persist in PostgreSQL. Existing operational files are imported on first access and remain unchanged on disk. Operator confirms availability and a positive quote before payment becomes available. Paid test orders are clearly marked and excluded from revenue summaries. Requests reserve scheduled capacity until cancelled; completed deliveries retain their reservation.
 
-To create the first administrator, set BootstrapAdmin__Email and BootstrapAdmin__Password securely in Railway (password at least 12 characters). Remove the bootstrap password after successful account creation. It never resets an existing account or promotes an already registered public account. Existing Azure accounts are not copied automatically.
+Payment drafts persist before leaving for Stripe. Return and signed webhook use the same database transaction and lock. Currency, mode, test/live environment, Stripe session ID and exact amount are checked. Provider failures return a retryable error. Confirmation emails are queued in the payment transaction and retried by the worker. Card details are never stored.
 
-## Still required before cutover
+## Backups
 
-1. Confirm the Railway plan and allowed monthly spend. The account returned “Your trial has expired. Please select a plan to continue using Railway” on project creation; no project was created.
-2. Verify Linux container build, PostgreSQL migration application, real database writes/date handling, admin login and durable files on restart. GitHub smoke checks cover initialization and public pages; these alone do not establish end-to-end payment functionality.
-3. Back up and inventory Azure SQL, pilot files, runtime settings and delivery photos. Decide which real records to import; do not delete or overwrite Azure data.
-4. Configure Stripe, verified transactional email and environment-specific callback/webhook settings. Test real payment flows in Stripe test mode before enabling live keys.
-5. Configure backup retention and verify restoring both PostgreSQL and app-volume data. A storage volume is not a backup.
-6. Add tippsend.ie only after production is healthy, then configure DNS and HTTPS. Keep the existing Azure site during verification.
+Admin > Download a backup exports a database snapshot plus persistent files. Archive contains private customer data and encryption keys: keep it securely off Railway. CI restores the SQL into a new disposable PostgreSQL database. Never restore directly into production without a separately reviewed plan and a current backup. Automatic off-site backup scheduling is still required for unattended operation; no Pro upgrade is configured.
 
-Production deployment, plan upgrades, domain changes, payment activation and data migration have not been performed by this branch.
+## Domain and email
+
+Domain registration is pending registry approval. Add exact Railway verification/CNAME and Resend records after activation. An apex CNAME requires DNS flattening/ALIAS support. Free Cloudflare DNS plus Email Routing is an option for receiving mail at hello@tippsend.ie and forwarding to the owner's existing inbox. Resend is outbound service email, not a full personal mailbox. Do not enable paid overages.
+
+## Before accepting real deliveries
+
+Confirm service area, availability, handling restrictions, cancellation/refund arrangements and appropriate vehicle/parcel cover. Review public terms/privacy for actual operations and hosting location. Verify DNS/HTTPS, actual email delivery, password reset, admin access, an actual Stripe sandbox checkout and signed webhook, delivery status/photo access, and a restorable off-site backup. Do not claim launch completion while these checks remain outstanding.

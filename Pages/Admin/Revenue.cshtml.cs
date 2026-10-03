@@ -32,7 +32,7 @@ public class RevenueModel : PageModel
         var monthStart = new DateTime(today.Year, today.Month, 1);
 
         var delivered = await _db.Orders
-            .Where(o => o.Status == OrderStatus.Delivered && o.DeliveredAt.HasValue)
+            .Where(o => !o.PaymentIsTest && o.Status == OrderStatus.Delivered && o.DeliveredAt.HasValue)
             .Select(o => new { o.Total, o.DeliveredAt, o.DeliveryDate })
             .ToListAsync();
 

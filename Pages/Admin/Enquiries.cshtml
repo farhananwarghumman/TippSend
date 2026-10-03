@@ -1,0 +1,8 @@
+@page
+@model TippSendApp.Pages.Admin.EnquiriesModel
+@{ViewData["Title"]="Business enquiries";}
+<main id="main-content" class="pilot-wrap" style="padding:40px 0 64px">
+<a href="/Admin">← Admin</a><h1 class="mt-3">Business enquiries</h1>
+@if(Model.Enquiries.Count==0){<p>No enquiries yet.</p>}
+@foreach(var e in Model.Enquiries){<article class="pilot-panel mb-3"><h2>@e.Business</h2><p>@e.Type · @e.Volume deliveries per week</p><p>@e.Needs</p><p>@e.Name · <a href="mailto:@e.Email">@e.Email</a> · @e.Phone</p><p class="pilot-note">Received @e.CreatedAt.ToString("d MMM yyyy HH:mm") UTC</p></article>}
+</main>

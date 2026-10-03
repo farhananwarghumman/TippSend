@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TippSendApp.Data;
@@ -11,9 +12,11 @@ using TippSendApp.Data;
 namespace TippSendApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261003215914_LaunchReadiness")]
+    partial class LaunchReadiness
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -339,10 +342,6 @@ namespace TippSendApp.Migrations
                     b.Property<decimal?>("ActualItemPrice")
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<string>("AgreedDeliveryWindow")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.Property<int?>("B2BAccountId")
                         .HasColumnType("integer");
 
@@ -411,9 +410,6 @@ namespace TippSendApp.Migrations
 
                     b.Property<int>("OrderType")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("PaymentIsTest")
-                        .HasColumnType("boolean");
 
                     b.Property<int?>("Rating")
                         .HasColumnType("integer");
