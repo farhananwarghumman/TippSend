@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Stripe;
 using System.Text.Json;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,15 +17,33 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+// Railway terminates HTTPS at its reverse proxy. Enable only behind that proxy.
+if (builder.Configuration.GetValue<bool>("ReverseProxy:Enabled"))
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
+        options.KnownNetworks.Clear();
+        options.KnownProxies.Clear();
+        options.ForwardLimit = 1;
+    });
+var persistentDataDir = builder.Configuration["AppSettingsDir"];
+if (!string.IsNullOrWhiteSpace(persistentDataDir))
+{
+    var keysDir = Path.Combine(persistentDataDir, "keys");
+    Directory.CreateDirectory(keysDir);
+    builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keysDir))
+        .SetApplicationName("TippSend");
+}
 
 // ── Identity ──────────────────────────────────────────────────────────────────
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 3;
+    options.Password.RequiredLength = 12;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
     options.Password.RequireLowercase = false;
@@ -63,8 +84,14 @@ builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<StripeService>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddSingleton<AppSettingsService>();
+builder.Services.AddSingleton<PilotService>();
+builder.Services.AddSingleton<MerchantEnquiryService>();
 
 var app = builder.Build();
+if (builder.Configuration.GetValue<bool>("ReverseProxy:Enabled")) app.UseForwardedHeaders();
+// The readiness probe returns no customer data and verifies database connectivity.
+app.MapGet("/health", async (ApplicationDbContext db) =>
+    await db.Database.CanConnectAsync() ? Results.Ok(new { status = "ready" }) : Results.StatusCode(503));
 
 // ── Pipeline ──────────────────────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
@@ -75,8 +102,17 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment() || !builder.Configuration.GetValue<bool>("LocalPreview")) app.UseHttpsRedirection();
 app.UseStaticFiles();
+var uploadDirectory = builder.Configuration["UploadsDir"];
+if (!string.IsNullOrWhiteSpace(uploadDirectory))
+{
+    Directory.CreateDirectory(uploadDirectory);
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(uploadDirectory), RequestPath = "/uploads"
+    });
+}
 app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
@@ -156,7 +192,8 @@ app.MapPost("/webhooks/stripe", async (HttpContext ctx) =>
     return Results.Ok();
 }).AllowAnonymous();
 
-// ── Seed roles + admin user ───────────────────────────────────────────────────
+// ── Migrate database and ensure roles ───────────────────────────────────────────────────
+if (!(app.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>("LocalPreview")))
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -172,36 +209,30 @@ using (var scope = app.Services.CreateScope())
             if (!await roleManager.RoleExistsAsync(role))
                 await roleManager.CreateAsync(new IdentityRole(role));
 
-        const string adminEmail = "admin@tippsend.ie";
-        const string adminPassword = "admin";
-
-        // Remove old seed account if it still exists under the old email
-        var oldAdmin = await userManager.FindByEmailAsync("admin@admin.com");
-        if (oldAdmin is not null)
-            await userManager.DeleteAsync(oldAdmin);
-
-        // Ensure the correct admin account exists with the right password
-        var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
-        if (existingAdmin is null)
+        var adminEmail = builder.Configuration["BootstrapAdmin:Email"];
+        var adminPassword = builder.Configuration["BootstrapAdmin:Password"];
+        var administrators = await userManager.GetUsersInRoleAsync("Admin");
+        if (!string.IsNullOrWhiteSpace(adminEmail) && !string.IsNullOrWhiteSpace(adminPassword)
+            && !administrators.Any())
         {
-            var admin = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
-            var result = await userManager.CreateAsync(admin, adminPassword);
-            if (result.Succeeded)
-                await userManager.AddToRoleAsync(admin, "Admin");
+            var admin = await userManager.FindByEmailAsync(adminEmail);
+            // Never turn an existing public account into an administrator automatically.
+            if (admin is not null) throw new InvalidOperationException("Bootstrap email is already registered.");
+            admin = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+            var created = await userManager.CreateAsync(admin, adminPassword);
+            if (!created.Succeeded) throw new InvalidOperationException("Admin bootstrap failed: " + string.Join(", ", created.Errors.Select(error => error.Code)));
+            var granted = await userManager.AddToRoleAsync(admin, "Admin");
+            if (!granted.Succeeded) throw new InvalidOperationException("Admin role assignment failed.");
         }
-        else
-        {
-            // Ensure the existing admin has the Admin role and correct password
-            if (!await userManager.IsInRoleAsync(existingAdmin, "Admin"))
-                await userManager.AddToRoleAsync(existingAdmin, "Admin");
-            var token = await userManager.GeneratePasswordResetTokenAsync(existingAdmin);
-            await userManager.ResetPasswordAsync(existingAdmin, token, adminPassword);
-        }
+
+        // Existing accounts and passwords are managed through Identity, never reset on startup.
+
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Error during database seed");
+        throw;
     }
 }
 

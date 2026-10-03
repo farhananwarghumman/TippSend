@@ -9,7 +9,8 @@ namespace TippSendApp.Pages.Track;
 public class IndexModel : PageModel
 {
     private readonly ApplicationDbContext _db;
-    public IndexModel(ApplicationDbContext db) => _db = db;
+    private readonly TippSendApp.Services.PilotService _pilot;
+    public IndexModel(ApplicationDbContext db, TippSendApp.Services.PilotService pilot) { _db=db; _pilot=pilot; }
 
     [BindProperty(SupportsGet = true)] public string? Token { get; set; }
     public Order? Order { get; private set; }
@@ -21,6 +22,19 @@ public class IndexModel : PageModel
     {
         if (string.IsNullOrWhiteSpace(Token)) return;
 
+        Token = Token.Trim();
+        if (Uri.TryCreate(Token, UriKind.Absolute, out var trackingUrl))
+            Token = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(trackingUrl.Query)["token"].ToString();
+        if (!System.Text.RegularExpressions.Regex.IsMatch(Token ?? "", "^[a-fA-F0-9]{32}$"))
+        {
+            ErrorMessage = "Enter the tracking code or link from your delivery confirmation. For a pending request, contact us with your request reference.";
+            return;
+        }
+        if (_pilot.Preview)
+        {
+            ErrorMessage = "Live order tracking is not connected in this local preview.";
+            return;
+        }
         Order = await _db.Orders
             .Include(o => o.Shop)
             .FirstOrDefaultAsync(o => o.TrackingToken == Token);

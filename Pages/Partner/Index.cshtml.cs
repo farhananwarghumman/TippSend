@@ -9,12 +9,15 @@ namespace TippSendApp.Pages.Partner;
 public class IndexModel : PageModel
 {
     private readonly EmailService _email;
-    public IndexModel(EmailService email) => _email = email;
+    private readonly MerchantEnquiryService _enquiries;
+    private readonly PilotService _pilot;
+    public IndexModel(EmailService email, MerchantEnquiryService enquiries, PilotService pilot) { _email=email; _enquiries=enquiries; _pilot=pilot; }
+    [BindProperty, Required(ErrorMessage="Tell us your pickup area, destinations and when orders are ready."), StringLength(1000, ErrorMessage="Keep delivery details to 1,000 characters or fewer.")] public string DeliveryNeeds { get; set; } = "";
 
     [BindProperty, Required(ErrorMessage = "Please enter your business name.")]
     public string BusinessName { get; set; } = "";
 
-    [BindProperty, Required(ErrorMessage = "Please select your shop type.")]
+    [BindProperty, Required(ErrorMessage = "Please select your business type.")]
     public string ShopType { get; set; } = "";
 
     [BindProperty, Required(ErrorMessage = "Please select estimated weekly deliveries.")]
@@ -23,7 +26,7 @@ public class IndexModel : PageModel
     [BindProperty, Required(ErrorMessage = "Please enter your name.")]
     public string ContactName { get; set; } = "";
 
-    [BindProperty, Required(ErrorMessage = "Please enter your phone number.")]
+    [BindProperty, Required(ErrorMessage = "Please enter your phone number."), Phone(ErrorMessage="Enter a valid phone number.")]
     public string Phone { get; set; } = "";
 
     [BindProperty, Required(ErrorMessage = "Please enter your email address."), EmailAddress]
@@ -63,7 +66,8 @@ public class IndexModel : PageModel
             </html>
             """;
 
-        await _email.SendEnquiryAsync($"New B2B Enquiry — {BusinessName}", html);
+        _enquiries.Save(BusinessName, ShopType, WeeklyDeliveries, ContactName, Phone, Email, DeliveryNeeds);
+        if (!_pilot.Preview) await _email.SendEnquiryAsync($"New B2B Enquiry — {BusinessName}", html);
         Submitted = true;
         return Page();
     }

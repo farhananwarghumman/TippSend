@@ -7,10 +7,12 @@ public class CloudinaryService
 {
     private readonly Cloudinary? _cloudinary;
     private readonly ILogger<CloudinaryService> _logger;
+    private readonly string _uploadsDirectory;
 
     public CloudinaryService(IConfiguration config, ILogger<CloudinaryService> logger)
     {
         _logger = logger;
+        _uploadsDirectory = config["UploadsDir"] ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         var cloud = config["Cloudinary:CloudName"];
         var key = config["Cloudinary:ApiKey"];
         var secret = config["Cloudinary:ApiSecret"];
@@ -53,9 +55,9 @@ public class CloudinaryService
     }
 
     // Local fallback — used when Cloudinary is not configured or fails
-    private static async Task<string?> SaveLocalAsync(IFormFile file)
+    private async Task<string?> SaveLocalAsync(IFormFile file)
     {
-        var dir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        var dir = _uploadsDirectory;
         Directory.CreateDirectory(dir);
         var name = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
         var path = Path.Combine(dir, name);

@@ -1,0 +1,16 @@
+.git
+.github
+bin
+obj
+publish
+node_modules
+App_Data
+runtime_settings.json
+wwwroot/uploads
+appsettings.Development.json
+appsettings.Production.json
+*.zip
+*.pfx
+*.p12
+.env*
+**/secrets.json
