@@ -1,157 +1,28 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
 using TippSendApp.Models;
 using TippSendApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Caching.Distributed;
-
 namespace TippSendApp.Pages.Send;
-
 public class IndexModel : PageModel
 {
-    private readonly StripeService _stripe;
-    private readonly EmailService _email;
-    private readonly IDistributedCache _cache;
-    private readonly AppSettingsService _appSettings;
-
-    public IndexModel(StripeService stripe, EmailService email, IDistributedCache cache, AppSettingsService appSettings)
-    {
-        _stripe = stripe;
-        _email = email;
-        _cache = cache;
-        _appSettings = appSettings;
+    private readonly PilotService _pilot;
+    public IndexModel(PilotService pilot) => _pilot=pilot;
+    [BindProperty] public PilotRequest Input { get; set; } = new();
+    public List<PilotRoute> Routes { get; set; } = new();
+    public string? RequestReference { get; set; }
+    public bool Preview => _pilot.Preview;
+    public void OnGet(string? service, string? route) { Routes=_pilot.Routes(); Input.PreferredDate=PilotService.IrishNow.Date.AddDays(1); if(service is "Scheduled" or "Dedicated") Input.Service=service; if(Routes.Any(r=>r.Id==route)) Input.RouteId=route; }
+    public IActionResult OnPost() {
+        Routes=_pilot.Routes();
+        if(Input.Service=="Scheduled") { ModelState.Remove("Input.PreferredTime"); if(string.IsNullOrEmpty(Input.RouteId)) ModelState.AddModelError("Input.RouteId","Choose an available departure."); }
+        if(!ModelState.IsValid) return Page();
+        try { RequestReference=_pilot.Submit(Input); }
+        catch(InvalidOperationException ex) { ModelState.AddModelError("",ex.Message); return Page(); }
+        TempData["PilotReference"]=RequestReference;
+        return RedirectToPage("Index", new { received=true });
     }
-
-    public bool OperatingAllDays { get; private set; }
-    public int MinBookingNoticeHours { get; private set; }
-
-    [BindProperty, Required(ErrorMessage = "Please enter the pickup address.")]
-    public string PickupAddress { get; set; } = "";
-
-    [BindProperty, Required(ErrorMessage = "We couldn't detect your area — please select it manually.")]
-    public string PickupZone { get; set; } = "";
-
-    [BindProperty, Required(ErrorMessage = "Please enter the drop-off address.")]
-    public string DropoffAddress { get; set; } = "";
-
-    [BindProperty, Required(ErrorMessage = "We couldn't detect your area — please select it manually.")]
-    public string DropoffZone { get; set; } = "";
-
-    [BindProperty, Required(ErrorMessage = "Please describe the item.")]
-    public string ItemDescription { get; set; } = "";
-
-    [BindProperty, Required(ErrorMessage = "Please select a preferred date.")]
-    public string PreferredDate { get; set; } = "";
-
-    [BindProperty, Required(ErrorMessage = "Please select a preferred time.")]
-    public string PreferredTime { get; set; } = "";
-
-    [BindProperty, Required(ErrorMessage = "Please enter your name.")]
-    public string ContactName { get; set; } = "";
-
-    [BindProperty, Required(ErrorMessage = "Please enter your email."), EmailAddress]
-    public string ContactEmail { get; set; } = "";
-
-    [BindProperty, Required(ErrorMessage = "Please enter your phone number.")]
-    public string ContactPhone { get; set; } = "";
-
-    [BindProperty, Required(ErrorMessage = "Please enter the recipient's name.")]
-    public string RecipientName { get; set; } = "";
-
-    [BindProperty, Required(ErrorMessage = "Please enter the recipient's phone number.")]
-    public string RecipientPhone { get; set; } = "";
-
-    [BindProperty]
-    public string SpecialInstructions { get; set; } = "";
-
-    [BindProperty, Range(typeof(bool), "true", "true", ErrorMessage = "Please confirm your item fits in a standard car boot.")]
-    public bool SizeAcknowledged { get; set; }
-
-    public string MinDate
-    {
-        get
-        {
-            var minTime = DateTime.Now.AddHours(MinBookingNoticeHours);
-            return minTime.Date.ToString("yyyy-MM-dd");
-        }
-    }
-
-    public void OnGet()
-    {
-        var settings = _appSettings.Get();
-        OperatingAllDays = settings.OperatingAllDays;
-        MinBookingNoticeHours = settings.MinBookingNoticeHours;
-    }
-
-    public async Task<IActionResult> OnPostAsync()
-    {
-        var settings = _appSettings.Get();
-        OperatingAllDays = settings.OperatingAllDays;
-        MinBookingNoticeHours = settings.MinBookingNoticeHours;
-
-        if (!ModelState.IsValid) return Page();
-
-        var price = CalculatePrice(PickupZone, DropoffZone);
-
-        var booking = new PickupDropBooking
-        {
-            PickupAddress        = PickupAddress,
-            PickupZone           = PickupZone,
-            DropoffAddress       = DropoffAddress,
-            DropoffZone          = DropoffZone,
-            ItemDescription      = ItemDescription,
-            PreferredDate        = PreferredDate,
-            PreferredTime        = PreferredTime,
-            ContactName          = ContactName,
-            ContactEmail         = ContactEmail,
-            ContactPhone         = ContactPhone,
-            RecipientName        = RecipientName,
-            RecipientPhone       = RecipientPhone,
-            SpecialInstructions  = SpecialInstructions,
-            Price                = price
-        };
-
-        // ── Stripe path ──────────────────────────────────────────────────────────
-        if (_stripe.IsConfigured)
-        {
-            var token = Guid.NewGuid().ToString("N");
-            await _cache.SetStringAsync(
-                $"pickup:{token}",
-                JsonSerializer.Serialize(booking),
-                new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(2)
-                });
-
-            var dateDisplay = DateTime.TryParse(PreferredDate, out var d)
-                ? d.ToString("ddd d MMM") : PreferredDate;
-            var timeDisplay = TimeSpan.TryParse(PreferredTime, out var t)
-                ? DateTime.Today.Add(t).ToString("h:mm tt") : PreferredTime;
-
-            var description = $"{ItemDescription} · {dateDisplay} at {timeDisplay} · {PickupAddress} → {DropoffAddress}";
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
-
-            var session = await _stripe.CreatePickupDropSessionAsync(
-                description, price, ContactEmail, token,
-                successUrl: $"{baseUrl}/send/return?token={token}",
-                cancelUrl:  $"{baseUrl}/send");
-
-            return Redirect(session.Url);
-        }
-
-        // ── Fallback: email notification if Stripe not configured ────────────────
-        await SendNotificationEmailAsync(booking, _email);
-        return RedirectToPage("/Index");
-    }
-
-    public static decimal CalculatePrice(string pickupZone, string dropoffZone)
-    {
-        return pickupZone == dropoffZone
-            ? pickupZone switch { "A" => 6m, "B" => 10m, "C" => 14m, _ => 12m }
-            : 12m;
-    }
-
+    public string? Received => TempData["PilotReference"] as string;
+    // Retained for the legacy payment return page; existing paid checkouts remain usable.
     public static async Task SendNotificationEmailAsync(PickupDropBooking b, EmailService email)
     {
         var dateDisplay = DateTime.TryParse(b.PreferredDate, out var d)

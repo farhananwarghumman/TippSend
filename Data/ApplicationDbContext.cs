@@ -1,6 +1,7 @@
 using TippSendApp.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace TippSendApp.Data;
 
@@ -47,7 +48,17 @@ public class ApplicationDbContext : IdentityDbContext
         builder.Entity<Order>().HasIndex(o => o.DeliveryDate);
         builder.Entity<Order>().HasIndex(o => o.Status);
 
-        SeedData(builder);
+        // Preserve existing date semantics: delivery dates are Irish local calendar values;
+        // audit timestamps are written as UTC by the application.
+        foreach (var entity in builder.Model.GetEntityTypes())
+            foreach (var property in entity.GetProperties())
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                {
+                    property.SetColumnType("timestamp without time zone");
+                    property.SetValueConverter(new ValueConverter<DateTime, DateTime>(
+                        value => DateTime.SpecifyKind(value, DateTimeKind.Unspecified), value => value));
+                }
+        // New hosted databases start empty. Demo merchants are not customer records.
     }
 
     private static void SeedData(ModelBuilder builder)

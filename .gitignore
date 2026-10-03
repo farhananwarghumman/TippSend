@@ -23,6 +23,10 @@ desktop.ini
 
 ## Node (if any tooling added later)
 node_modules/
+App_Data/
+runtime_settings.json
+wwwroot/uploads/
+.env*
 
 ## Migrations output (keep source, ignore compiled output)
 # Uncomment if needed:

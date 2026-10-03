@@ -246,13 +246,13 @@
             </div>
             <div class="ms-auto d-flex gap-2 align-items-center">
                 <span class="badge bg-secondary">@Model.DeliveredToday / @Model.TotalToday done</span>
-                <a asp-page="/Book/Step1" class="btn btn-gold btn-sm">+ Gift order</a>
+                <a asp-page="/send" class="btn btn-gold btn-sm">+ New pickup</a>
             </div>
         </div>
 
         <!-- Service filter tabs -->
         <div class="op-filters">
-            @foreach (var (label, val) in new[] { ("All", ""), ("Gift & Deliver", "Gift"), ("Pickup & Drop", "PickupDrop"), ("B2B", "B2B") })
+            @foreach (var (label, val) in new[] { ("All", ""), ("Pickup & Drop", "PickupDrop"), ("B2B", "B2B") })
             {
                 <a asp-page="Dashboard" asp-route-FilterType="@val" asp-route-ViewDateStr="@Model.ViewDateStr"
                    class="btn btn-sm @(Model.FilterType == val ? "btn-dark" : "btn-outline-secondary")">@label</a>
