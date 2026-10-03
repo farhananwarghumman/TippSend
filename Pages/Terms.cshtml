@@ -1,82 +1,13 @@
 @page "/terms"
-@{
-    ViewData["Title"] = "Terms & Conditions — TippSend";
-}
-
-@section Styles {
-<style>
-body { background: var(--gs-cream); }
-.terms-hero {
-    background: var(--gs-bog-deep);
-    padding: 64px 0 48px;
-    text-align: center;
-}
-.terms-body { max-width: 720px; margin: 0 auto; padding: 64px 24px 96px; }
-.terms-body h2 { font-size: 1.15rem; font-weight: 600; color: var(--gs-bog-deep); margin: 2rem 0 .5rem; }
-.terms-body p, .terms-body li { font-size: 15px; color: var(--gs-bog); line-height: 1.7; }
-.terms-body ul { padding-left: 1.4rem; margin-bottom: 1rem; }
-.terms-body .prohibited-list li { color: var(--gs-claret); font-weight: 500; }
-.last-updated { font-size: 12px; color: var(--gs-stone); margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--gs-mist); }
-</style>
-}
-
-<section class="terms-hero">
-    <div class="eyebrow mb-3" style="color:var(--gs-gold-soft)">Legal</div>
-    <h1 style="font-family:var(--display);font-weight:400;font-size:clamp(28px,4vw,46px);color:white;margin:0;letter-spacing:-0.02em">
-        Terms &amp; Conditions
-    </h1>
-    <p style="color:var(--gs-fog);margin-top:12px;font-size:15px">Last updated: June 2026</p>
-</section>
-
-<div class="terms-body" id="main-content">
-
-    <h2>1. About TippSend</h2>
-    <p>TippSend is a local delivery service based in Clonmel, Co. Tipperary, Ireland. We collect items from one address and deliver them to another within South Tipperary. By booking a delivery you agree to these terms.</p>
-
-    <h2>2. Prohibited Items</h2>
-    <p>You must not send any of the following items using TippSend. Doing so is a breach of these terms and may result in immediate cancellation without refund, and may be reported to An Garda Síochána:</p>
-    <ul class="prohibited-list">
-        <li>Illegal drugs or controlled substances of any kind</li>
-        <li>Weapons, firearms, ammunition or any item intended to cause harm</li>
-        <li>Stolen goods or items obtained through fraud</li>
-        <li>Prescription medicines for a third party without authorisation</li>
-        <li>Cash over €200 or financial instruments</li>
-        <li>Hazardous materials, flammable liquids, explosives or chemicals</li>
-        <li>Live animals</li>
-        <li>Counterfeit or illegally copied goods</li>
-        <li>Any item whose possession, sale or transport is prohibited under Irish law</li>
-    </ul>
-
-    <h2>3. Customer Declaration</h2>
-    <p>By completing a booking, you confirm that:</p>
-    <ul>
-        <li>The item(s) being sent are legal and permitted under Irish law</li>
-        <li>You are authorised to send the item(s)</li>
-        <li>The item(s) do not appear on the prohibited list above</li>
-        <li>All information provided during booking is accurate and truthful</li>
-    </ul>
-    <p>TippSend relies on this declaration. If false information is provided, full liability rests with the sender.</p>
-
-    <h2>4. Our Right to Refuse</h2>
-    <p>TippSend reserves the right to refuse, cancel or terminate any booking at its discretion, including where we have reasonable suspicion that a prohibited item is involved. In such cases a full refund will be issued if collection has not yet taken place.</p>
-
-    <h2>5. Cancellations & Refunds</h2>
-    <p>You may cancel your booking for a full refund up to <strong>2 hours before</strong> your scheduled pickup time by contacting us via WhatsApp or email at <a href="mailto:hello@tippsend.ie">hello@tippsend.ie</a>. Cancellations after this point may not be eligible for a refund if the driver is already en route.</p>
-
-    <h2>6. Delivery Times</h2>
-    <p>Preferred times are a guide only. We make every reasonable effort to collect and deliver within the requested window, but cannot guarantee exact times due to traffic, access issues or unforeseen circumstances. TippSend is not liable for losses arising from delayed delivery.</p>
-
-    <h2>7. Items Limit</h2>
-    <p>Items must fit in a standard car boot and weigh no more than 25 kg. TippSend is not responsible for damage to items that are improperly packaged or inherently fragile.</p>
-
-    <h2>8. Liability</h2>
-    <p>TippSend acts as a carrier only. Our liability for loss or damage to an item is limited to the delivery fee paid. We strongly recommend insuring high-value items separately.</p>
-
-    <h2>9. Operating Hours</h2>
-    <p>TippSend currently operates <strong>Saturday and Sunday only, 9am–9pm</strong>. Bookings outside these hours will not be fulfilled.</p>
-
-    <h2>10. Contact</h2>
-    <p>For any questions about these terms, contact us at <a href="mailto:hello@tippsend.ie">hello@tippsend.ie</a> or via WhatsApp.</p>
-
-    <p class="last-updated">These terms were last updated in June 2026 and apply to all bookings made on or after this date. TippSend is operated as a sole trader based in Clonmel, Co. Tipperary, Ireland.</p>
-</div>
+@{ViewData["Title"]="Delivery terms";}
+<main id="main-content" class="pilot-wrap" style="max-width:760px;padding:48px 0 64px">
+<h1>Delivery terms.</h1><p class="pilot-note">Updated 3 October 2026</p>
+<h2>Requesting a delivery</h2><p>TippSend collects items from homes and businesses for delivery to another address. Submitting a form is a request. We confirm the addresses, availability, delivery window, price and any handling requirements before accepting the job.</p>
+<h2>Eligible items</h2><p>Items must be safely packaged, fit in a standard car boot, weigh no more than 25 kg and have a declared value no greater than €500. Tell us about fragile items or special handling before we accept the delivery.</p>
+<p>We do not accept cash, financial instruments, medicines, temperature-sensitive goods, hazardous materials, weapons, illegal goods or live animals. You must be authorised to send the item and provide accurate information.</p>
+<h2>Payment and test bookings</h2><p>Payment is requested only after a quote and availability have been agreed. A checkout marked “test” is for testing only: it does not take a real payment or arrange a delivery.</p>
+<h2>Collection and handover</h2><p>Have the item ready at the agreed collection time. Make sure the recipient can receive it during the agreed window. Tell us about access restrictions before collection. If collection or handover fails, we will contact you to agree a return or another attempt and disclose any additional charge before proceeding.</p>
+<h2>Cancellations and refunds</h2><p>Contact TippSend as soon as possible if you need to cancel. Cancellation arrangements and any applicable charges must be agreed before payment. If we cannot carry out an accepted delivery, we will contact you to arrange an alternative or a refund for the service not provided. Your statutory consumer rights remain unaffected.</p>
+<h2>Delivery windows and item care</h2><p>Delivery windows are agreed estimates. Traffic, weather and access issues may affect timing. We will communicate material changes. Report damage, loss or any other delivery issue promptly so we can investigate. Do not send an item requiring specialist handling or insurance unless we have agreed suitable arrangements in advance.</p>
+<h2>Contact</h2><p>Email <a href="mailto:hello@tippsend.ie">hello@tippsend.ie</a> and include your request or order reference. Personal information is handled as described in our <a href="/Privacy">privacy policy</a>.</p>
+</main>

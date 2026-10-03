@@ -3,6 +3,7 @@ namespace TippSendApp.Models;
 public class PilotRequest
 {
     public string Reference { get; set; } = "";
+    public string TrackingToken { get; set; } = Guid.NewGuid().ToString("N");
     [Display(Name="Delivery service"), Required(ErrorMessage="Choose a delivery service."), RegularExpression("^(Scheduled|Dedicated)$", ErrorMessage="Choose scheduled or separate delivery.")] public string Service { get; set; } = "Dedicated";
     public string? RouteId { get; set; }
     [Display(Name="Pickup address"), Required(ErrorMessage="Enter the full pickup address."), StringLength(300)] public string PickupAddress { get; set; } = "";

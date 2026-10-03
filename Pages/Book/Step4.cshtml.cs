@@ -15,20 +15,20 @@ public class Step4Model : PageModel
     private readonly PricingService _pricing;
     private readonly OrderService _orderService;
     private readonly StripeService _stripe;
-    private readonly IDistributedCache _cache;
+    private readonly PaymentService _payments;
 
     public Step4Model(
         ApplicationDbContext db,
         PricingService pricing,
         OrderService orderService,
         StripeService stripe,
-        IDistributedCache cache)
+        PaymentService payments)
     {
         _db = db;
         _pricing = pricing;
         _orderService = orderService;
         _stripe = stripe;
-        _cache = cache;
+        _payments = payments;
     }
 
     [BindProperty] public string CardMessage { get; set; } = string.Empty;
@@ -66,16 +66,8 @@ public class Step4Model : PageModel
         // ── Stripe path ──────────────────────────────────────────────────────
         if (_stripe.IsConfigured)
         {
-            var pendingToken = Guid.NewGuid().ToString("N");
-
-            await _cache.SetStringAsync(
-                $"pending:{pendingToken}",
-                JsonSerializer.Serialize(Session),
-                new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(2)
-                });
-
+            var draft = await _payments.CreateDraftAsync("gift", Session, EstimatedTotal);
+            var pendingToken = draft.Token;
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
             var stripeSession = await _stripe.CreateCheckoutSessionAsync(
                 Session,
@@ -84,15 +76,13 @@ public class Step4Model : PageModel
                 cancelUrl:  $"{baseUrl}/Book/Step4",
                 ServiceFee, Surcharge, ItemMarkup);
 
+            await _payments.AttachSessionAsync(pendingToken, stripeSession.Id);
             return Redirect(stripeSession.Url);
         }
 
-        // ── Direct path (Stripe not yet configured) ──────────────────────────
-        var order = await _orderService.CreateFromSessionAsync(Session);
-        HttpContext.Session.Remove("Booking");
-        return RedirectToPage("Confirmation", new { token = order.TrackingToken });
+        ModelState.AddModelError("", "Online payment is not available yet. Please use Send an Item to request a delivery quote.");
+        return Page();
     }
-
     private async Task LoadDisplayDataAsync(BookingSession session)
     {
         if (session.ShopId.HasValue)

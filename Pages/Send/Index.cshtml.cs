@@ -6,20 +6,28 @@ namespace TippSendApp.Pages.Send;
 public class IndexModel : PageModel
 {
     private readonly PilotService _pilot;
-    public IndexModel(PilotService pilot) => _pilot=pilot;
+    private readonly EmailService _email;
+    private readonly IConfiguration _config;
+    public IndexModel(PilotService pilot, EmailService email, IConfiguration config) { _pilot=pilot; _email=email; _config=config; }
     [BindProperty] public PilotRequest Input { get; set; } = new();
     public List<PilotRoute> Routes { get; set; } = new();
     public string? RequestReference { get; set; }
     public bool Preview => _pilot.Preview;
     public void OnGet(string? service, string? route) { Routes=_pilot.Routes(); Input.PreferredDate=PilotService.IrishNow.Date.AddDays(1); if(service is "Scheduled" or "Dedicated") Input.Service=service; if(Routes.Any(r=>r.Id==route)) Input.RouteId=route; }
-    public IActionResult OnPost() {
+    public async Task<IActionResult> OnPostAsync() {
         Routes=_pilot.Routes();
         if(Input.Service=="Scheduled") { ModelState.Remove("Input.PreferredTime"); if(string.IsNullOrEmpty(Input.RouteId)) ModelState.AddModelError("Input.RouteId","Choose an available departure."); }
         if(!ModelState.IsValid) return Page();
         try { RequestReference=_pilot.Submit(Input); }
         catch(InvalidOperationException ex) { ModelState.AddModelError("",ex.Message); return Page(); }
         TempData["PilotReference"]=RequestReference;
-        return RedirectToPage("Index", new { received=true });
+        var baseUrl=_config["PublicBaseUrl"]?.TrimEnd('/') ?? $"{Request.Scheme}://{Request.Host}";
+        if (!_pilot.Preview) {
+            await _email.SendDeliveryRequestAsync(Input,$"{baseUrl}/Send/Request?token={Input.TrackingToken}");
+            await _email.SendEnquiryAsync($"Delivery request — {RequestReference}",
+                $"<p>A new delivery request is waiting.</p><p><a href='{baseUrl}/Admin/Dispatch'>Open dispatch</a></p>");
+        }
+        return RedirectToPage("Request", new { token=Input.TrackingToken });
     }
     public string? Received => TempData["PilotReference"] as string;
     // Retained for the legacy payment return page; existing paid checkouts remain usable.

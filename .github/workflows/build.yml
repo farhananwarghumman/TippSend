@@ -24,12 +24,24 @@ jobs:
       ASPNETCORE_ENVIRONMENT: Staging
       ASPNETCORE_URLS: http://127.0.0.1:8080
       ReverseProxy__Enabled: 'true'
+      BootstrapAdmin__Email: admin@example.invalid
+      BootstrapAdmin__SetupToken: disposable-ci-setup-token
+      BootstrapAdmin__SetupExpiresAt: '2099-01-01T00:00:00Z'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
       - run: dotnet publish TippSendApp.csproj -c Release -o /tmp/tippsend-publish
+      - name: Verify durable booking and payment flows
+        run: dotnet run --project tests/LaunchChecks/LaunchChecks.csproj -c Release
+      - name: Verify backup restores into an empty database
+        env:
+          PGPASSWORD: disposable_ci_password
+        run: |
+          createdb -h localhost -U tippsend tippsend_restore_test
+          psql -h localhost -U tippsend -d tippsend_restore_test -v ON_ERROR_STOP=1 -f /tmp/tippsend-restore.sql > /tmp/restore.log
+          test "$(psql -h localhost -U tippsend -d tippsend_restore_test -tAc 'SELECT COUNT(*) FROM "Orders"')" -ge 1
       - name: Verify PostgreSQL initialization and public pages
         shell: bash
         run: |
@@ -44,5 +56,10 @@ jobs:
           curl --fail --silent -H 'X-Forwarded-Proto: https' http://127.0.0.1:8080/health
           curl --fail --silent -H 'X-Forwarded-Proto: https' http://127.0.0.1:8080/ > /tmp/homepage.html
           grep -q 'Send an Item' /tmp/homepage.html
+          test "$(curl --silent -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' http://127.0.0.1:8080/Admin)" = '302'
+          test "$(curl --silent -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' http://127.0.0.1:8080/Identity/Account/Register)" = '404'
+          test "$(curl --silent -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' -X POST http://127.0.0.1:8080/Send)" = '400'
+      - name: Verify public request and admin workflow
+        run: python3 tests/http_workflow.py
       - name: Build Linux container
         run: docker build -t tippsend-ci .

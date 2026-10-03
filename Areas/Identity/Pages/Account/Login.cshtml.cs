@@ -53,7 +53,7 @@ public class LoginModel : PageModel
         if (!ModelState.IsValid) return Page();
 
         var result = await _signInManager.PasswordSignInAsync(
-            Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+            Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
 
         if (result.Succeeded)
         {
@@ -65,6 +65,8 @@ public class LoginModel : PageModel
             _logger.LogWarning("User account locked out.");
             return RedirectToPage("./Lockout");
         }
+        if (result.RequiresTwoFactor)
+            return RedirectToPage("./LoginWith2fa",new { ReturnUrl=returnUrl, RememberMe=Input.RememberMe });
 
         ModelState.AddModelError(string.Empty, "Invalid email or password.");
         return Page();

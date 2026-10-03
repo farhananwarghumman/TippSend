@@ -1,0 +1,19 @@
+@page
+@model TippSendApp.Pages.Send.RequestModel
+@{ViewData["Title"]="Your delivery request"; var r=Model.Delivery;}
+<main id="main-content" class="pilot-wrap" style="padding:48px 0 64px;max-width:720px">
+<div class="pilot-kicker">Your delivery</div><h1>Your delivery request.</h1>
+<div asp-validation-summary="All" role="alert"></div>
+@if(r is not null){
+<section class="pilot-panel"><p><strong>@r.Reference</strong> · @r.Status</p>
+<p>@r.PickupAddress (@r.PickupEircode)<br>to @r.DropoffAddress (@r.DropoffEircode)</p>
+<p>@r.PreferredDate.ToString("dddd d MMMM") · @r.PreferredTime</p><p>@r.ItemDescription</p>
+@if(r.QuotedPrice is not null){<p>Delivery price: <strong>€@r.QuotedPrice.Value.ToString("F2")</strong></p>}
+@if(Model.CanPay){
+@if(Model.TestMode){<p class="pilot-note"><strong>Test payment only.</strong> This checkout is for testing and does not confirm a real delivery.</p>}
+<p class="pilot-note">Pay only after agreeing collection, delivery and cancellation arrangements with TippSend. <a href="/Terms">Delivery terms</a>.</p>
+<form method="post" asp-page-handler="Pay"><input type="hidden" asp-for="Token"><button class="pilot-button">@(Model.TestMode?"Open test checkout":"Pay delivery fee") →</button></form>
+}else{<p class="pilot-note">We will confirm availability and the price before payment. Your request is not a confirmed delivery.</p>}
+</section>}
+<p class="pilot-note mt-3">Keep this link private. It gives access to your delivery details.</p>
+</main>

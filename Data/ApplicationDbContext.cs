@@ -15,10 +15,15 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<Shop> Shops => Set<Shop>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<B2BAccount> B2BAccounts => Set<B2BAccount>();
+    public DbSet<OperationalDocument> OperationalDocuments => Set<OperationalDocument>();
+    public DbSet<PaymentDraft> PaymentDrafts => Set<PaymentDraft>();
+    public DbSet<EmailMessage> EmailMessages => Set<EmailMessage>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.Entity<PaymentDraft>().HasIndex(x => x.StripeSessionId).IsUnique();
+        builder.Entity<EmailMessage>().HasIndex(x => new { x.SentAt, x.NextAttemptAt });
 
         builder.Entity<Order>()
             .Property(o => o.ServiceFee).HasColumnType("decimal(10,2)");

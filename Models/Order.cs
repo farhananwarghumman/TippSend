@@ -55,6 +55,8 @@ public class Order
 
     // Delivery
     public DateTime DeliveryDate { get; set; }
+    [MaxLength(100)] public string? AgreedDeliveryWindow { get; set; }
+    public bool PaymentIsTest { get; set; }
     public TimeSpan DeliveryWindowStart { get; set; }
     public DeliveryTier Tier { get; set; }
     public PricingZone Zone { get; set; }
@@ -119,6 +121,7 @@ public class Order
     {
         get
         {
+            if (!string.IsNullOrWhiteSpace(AgreedDeliveryWindow)) return AgreedDeliveryWindow;
             var start = DeliveryWindowStart;
             var minutes = Tier switch
             {

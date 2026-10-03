@@ -14,3 +14,6 @@ appsettings.Production.json
 *.p12
 .env*
 **/secrets.json
+**/bin
+**/obj
+tests

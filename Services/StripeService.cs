@@ -13,7 +13,10 @@ public class StripeService
         _config = config;
     }
 
-    public bool IsConfigured => !string.IsNullOrWhiteSpace(_config["Stripe:SecretKey"]);
+    public bool IsLive => _config["Stripe:SecretKey"]?.StartsWith("sk_live_") == true;
+    public bool IsConfigured => !string.IsNullOrWhiteSpace(_config["Stripe:SecretKey"])
+        && !string.IsNullOrWhiteSpace(_config["Stripe:WebhookSecret"])
+        && (!IsLive || _config.GetValue<bool>("Stripe:EnableLivePayments"));
 
     public async Task<Session> CreateCheckoutSessionAsync(
         BookingSession booking,
@@ -86,7 +89,7 @@ public class StripeService
             PhoneNumberCollection = new SessionPhoneNumberCollectionOptions { Enabled = false }
         };
 
-        return await new SessionService().CreateAsync(options);
+        return await new SessionService().CreateAsync(options, new RequestOptions { IdempotencyKey = pendingToken });
     }
 
     public async Task<Session> CreatePickupDropSessionAsync(
@@ -95,7 +98,8 @@ public class StripeService
         string customerEmail,
         string pendingToken,
         string successUrl,
-        string cancelUrl)
+        string cancelUrl,
+        string? checkoutAttempt = null)
     {
         var options = new SessionCreateOptions
         {
@@ -118,13 +122,13 @@ public class StripeService
                 }
             },
             CustomerEmail = string.IsNullOrWhiteSpace(customerEmail) ? null : customerEmail,
-            Metadata = new Dictionary<string, string> { ["pickupToken"] = pendingToken },
+            Metadata = new Dictionary<string, string> { ["pendingToken"] = pendingToken },
             SuccessUrl = successUrl,
             CancelUrl = cancelUrl,
             PaymentMethodTypes = new List<string> { "card" }
         };
 
-        return await new SessionService().CreateAsync(options);
+        return await new SessionService().CreateAsync(options, new RequestOptions { IdempotencyKey = checkoutAttempt ?? pendingToken });
     }
 
     public async Task<Session> GetSessionAsync(string sessionId)

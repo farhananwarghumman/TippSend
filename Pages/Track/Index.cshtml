@@ -246,6 +246,7 @@ body { background: var(--gs-cream); }
 
         @if (o is not null)
         {
+            @if(o.PaymentIsTest){<p class="pilot-panel"><strong>Test booking.</strong> This is a demonstration; no real delivery is arranged.</p>}
             var statusLabel = o.Status switch {
                     OrderStatus.Queued     => "Queued",
                     OrderStatus.Confirmed  => "Confirmed",
@@ -321,7 +322,7 @@ body { background: var(--gs-cream); }
                     {
                         <div style="margin-top:16px">
                             <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gs-stone);margin-bottom:8px">Delivery photo</div>
-                            <img src="@o.DeliveryPhotoPath" alt="Delivery photo" style="width:100%;border-radius:var(--r-sm);border:1px solid var(--gs-mist)" />
+                            <img src="@(o.DeliveryPhotoPath.StartsWith("/uploads/") ? o.DeliveryPhotoPath + "?token=" + o.TrackingToken : o.DeliveryPhotoPath)" alt="Delivery photo" style="width:100%;border-radius:var(--r-sm);border:1px solid var(--gs-mist)" />
                         </div>
                     }
                 </div>
