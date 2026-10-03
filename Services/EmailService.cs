@@ -27,8 +27,8 @@ public class EmailService
         if (string.IsNullOrWhiteSpace(order.SenderEmail)) return;
         await SendAsync(
             to: order.SenderEmail,
-            subject: $"Your TippSend order is confirmed — {order.Reference}",
-            html: BuildConfirmationHtml(order));
+            subject: $"{(order.PaymentIsTest ? "TEST — " : "")}Your TippSend order is confirmed — {order.Reference}",
+            html: (order.PaymentIsTest ? "<p><strong>Test booking only. No real delivery is confirmed.</strong></p>" : "") + BuildConfirmationHtml(order));
     }
 
     public async Task SendEnquiryAsync(string subject, string html)

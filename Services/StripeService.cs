@@ -98,7 +98,8 @@ public class StripeService
         string customerEmail,
         string pendingToken,
         string successUrl,
-        string cancelUrl)
+        string cancelUrl,
+        string? checkoutAttempt = null)
     {
         var options = new SessionCreateOptions
         {
@@ -127,7 +128,7 @@ public class StripeService
             PaymentMethodTypes = new List<string> { "card" }
         };
 
-        return await new SessionService().CreateAsync(options, new RequestOptions { IdempotencyKey = pendingToken });
+        return await new SessionService().CreateAsync(options, new RequestOptions { IdempotencyKey = checkoutAttempt ?? pendingToken });
     }
 
     public async Task<Session> GetSessionAsync(string sessionId)

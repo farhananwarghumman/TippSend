@@ -34,13 +34,14 @@ public class RequestModel(PilotService pilot, StripeService stripe, PaymentServi
                 await payments.FulfilAsync(session);
                 return RedirectToPage("/Track/Index",new { token=Token });
             }
-            ModelState.AddModelError("", "This payment link has expired. Please contact TippSend for a new quote."); return Page();
+            if(session.Status!="expired") { ModelState.AddModelError("", "Payment is being processed. Please check again shortly."); return Page(); }
         }
         var draft=existing ?? await payments.CreateDraftAsync("pilot",Delivery!,Delivery!.QuotedPrice!.Value,Token);
         try {
             var baseUrl=config["PublicBaseUrl"]?.TrimEnd('/') ?? $"{Request.Scheme}://{Request.Host}";
             var session=await stripe.CreatePickupDropSessionAsync($"Delivery {Delivery!.Reference}", draft.AmountCents/100m,
-                Delivery.ContactEmail,draft.Token,$"{baseUrl}/Book/PaymentReturn?session_id={{CHECKOUT_SESSION_ID}}",$"{baseUrl}/Send/Request?token={Token}");
+                Delivery.ContactEmail,draft.Token,$"{baseUrl}/Book/PaymentReturn?session_id={{CHECKOUT_SESSION_ID}}",$"{baseUrl}/Send/Request?token={Token}",
+                draft.StripeSessionId is null ? draft.Token : draft.Token+":"+draft.StripeSessionId);
             await payments.AttachSessionAsync(draft.Token,session.Id);
             return Redirect(session.Url);
         } catch (Stripe.StripeException) {

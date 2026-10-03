@@ -34,7 +34,7 @@ try:
     _,_,html=request('/Identity/Account/Login');fields=Inputs();fields.feed(html)
     assert request('/Identity/Account/Login',{'__RequestVerificationToken':fields.values['__RequestVerificationToken'],'Input.Email':'admin@example.invalid','Input.Password':'DisposableCIpassphrase123'})[0]==302
     assert request('/Admin')[0]==200
-    for path in ['/Admin/Dispatch','/Admin/Enquiries','/Admin/Backup','/Operator/Dashboard']:
+    for path in ['/Admin/Dispatch','/Admin/Enquiries','/Admin/Emails','/Admin/Backup','/Operator/Dashboard']:
         assert request(path)[0]==200,path
     _,_,html=request('/Send');fields=Inputs();fields.feed(html)
     import datetime

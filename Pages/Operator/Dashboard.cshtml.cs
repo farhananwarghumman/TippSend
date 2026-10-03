@@ -84,7 +84,7 @@ public class DashboardModel : PageModel
         TotalToday    = TodaysOrders.Count;
         DeliveredToday = TodaysOrders.Count(o => o.Status == OrderStatus.Delivered);
         ActiveToday   = TodaysOrders.Count(o => o.Status != OrderStatus.Delivered && o.Status != OrderStatus.Failed);
-        RevToday      = TodaysOrders.Where(o => o.Status == OrderStatus.Delivered).Sum(o => o.Total);
+        RevToday      = TodaysOrders.Where(o => o.Status == OrderStatus.Delivered && !o.PaymentIsTest).Sum(o => o.Total);
 
         if (SelectedOrderId.HasValue)
             SelectedOrder = TodaysOrders.FirstOrDefault(o => o.Id == SelectedOrderId.Value)

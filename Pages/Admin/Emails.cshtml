@@ -1,0 +1,12 @@
+@page
+@model TippSendApp.Pages.Admin.EmailsModel
+@{ViewData["Title"]="Email delivery";}
+<main id="main-content" class="pilot-wrap" style="padding:40px 0 64px">
+<a href="/Admin">← Admin</a><h1 class="mt-3">Email delivery</h1>
+@if(!Model.Configured){<p class="pilot-note">Email sending is awaiting configuration. Messages are saved and will send once the provider is connected.</p>}
+<p>Latest 100 messages.</p>
+@foreach(var m in Model.Messages){<article class="pilot-panel mb-3"><h2>@m.Subject</h2><p>@m.To</p><p>@(m.SentAt is not null ? "Sent" : m.Attempts>=12 ? "Needs attention" : "Queued") · Attempts: @m.Attempts</p>
+@if(m.LastError is not null){<p>@m.LastError</p>}
+@if(m.SentAt is null && m.Attempts>0){<form method="post" asp-page-handler="Retry"><input type="hidden" name="id" value="@m.Id"><button class="pilot-button">Retry sending</button></form>}
+</article>}
+</main>
