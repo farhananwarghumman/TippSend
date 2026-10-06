@@ -26,7 +26,7 @@ public class EmailWorker(IServiceScopeFactory scopes, IConfiguration config, IHt
                     request.Content=new StringContent(JsonSerializer.Serialize(new {
                         from=$"TippSend <{config["Resend:FromAddress"] ?? "orders@tippsend.ie"}>",
                         to=new[]{m.To}, subject=m.Subject, html=m.Html,
-                        reply_to=config["Notifications:ReplyTo"] ?? "hello@tippsend.ie"
+                        reply_to=config["Notifications:ReplyTo"] ?? "contact@tippsend.ie"
                     }),Encoding.UTF8,"application/json");
                     m.Attempts++;
                     try {

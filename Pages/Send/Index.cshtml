@@ -3,7 +3,7 @@
 @{ ViewData["Title"]="Send an item"; var received=Model.Received; }
 <main id="main-content" class="pilot-wrap" style="padding-top:48px;padding-bottom:64px">
 <div class="pilot-kicker">For businesses and personal deliveries</div><h1 style="font-size:44px;font-weight:650;letter-spacing:-.04em">Send an item.</h1><p class="pilot-lead">Arrange collection from a home or business and delivery to another address. Choose a shared run or ask for a separate trip. We confirm the details and price before you pay.</p>
-@if(received is not null) { <div class="pilot-success" role="status"><h2>Request received.</h2><p>Your reference is <strong>@received</strong>. Keep this reference when contacting hello@tippsend.ie.</p><p class="mb-0">This is a request, not a confirmed delivery. No payment has been taken. We will agree the price and availability before acceptance.</p></div> }
+@if(received is not null) { <div class="pilot-success" role="status"><h2>Request received.</h2><p>Your reference is <strong>@received</strong>. Keep this reference when contacting contact@tippsend.ie.</p><p class="mb-0">This is a request, not a confirmed delivery. No payment has been taken. We will agree the price and availability before acceptance.</p></div> }
 else {
 <div class="pilot-grid pilot-book-grid" style="align-items:start;margin-top:32px">
 <form method="post" class="pilot-panel pilot-form" id="delivery-form">
@@ -24,7 +24,7 @@ else {
 <p class="pilot-note">Submitting sends an enquiry. Any cancellation, return and handover arrangements will be agreed before a delivery is accepted. Read our <a href="/Privacy">privacy policy</a>.</p>
 <button class="pilot-button" type="submit">Send delivery request →</button>
 </form>
-<aside class="pilot-panel"><div class="pilot-kicker">Before you send a request</div><h2 style="font-size:26px">Everything agreed upfront.</h2><p class="pilot-note">The price shown applies to the selected run and eligible addresses. A separate trip receives its own quote.</p><hr><p class="pilot-note"><strong>No payment on this form.</strong><br>Keep your request reference. To ask about a pending request, email hello@tippsend.ie and include that reference.</p><hr><p class="pilot-note"><strong>Have your item ready.</strong><br>We collect from homes and businesses. Please package the item safely before collection; shopping and gift wrapping are not included.</p>@if(Model.Preview) { <hr><p class="pilot-note"><strong>Local demonstration</strong><br>The listed departures are sample routes for reviewing this page.</p> }</aside></div>
+<aside class="pilot-panel"><div class="pilot-kicker">Before you send a request</div><h2 style="font-size:26px">Everything agreed upfront.</h2><p class="pilot-note">The price shown applies to the selected run and eligible addresses. A separate trip receives its own quote.</p><hr><p class="pilot-note"><strong>No payment on this form.</strong><br>Keep your request reference. To ask about a pending request, email contact@tippsend.ie and include that reference.</p><hr><p class="pilot-note"><strong>Have your item ready.</strong><br>We collect from homes and businesses. Please package the item safely before collection; shopping and gift wrapping are not included.</p>@if(Model.Preview) { <hr><p class="pilot-note"><strong>Local demonstration</strong><br>The listed departures are sample routes for reviewing this page.</p> }</aside></div>
 }
 </main>
 @section Scripts { <script>
