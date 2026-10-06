@@ -1,9 +1,35 @@
+@{
+    var searchPage = TippSendApp.Services.SearchMetadata.Find(Context.Request.Path.Value);
+    var indexable = searchPage is not null && !Context.Request.QueryString.HasValue && Context.Request.Method == "GET";
+    var searchTitle = searchPage?.Title ?? ViewData["Title"]?.ToString();
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] – TippSend</title>
+    <title>@searchTitle – TippSend</title>
+    @if (indexable)
+    {
+        var canonical = TippSendApp.Services.SearchMetadata.Origin + searchPage!.Path;
+        <meta name="description" content="@searchPage.Description" />
+        <meta name="robots" content="index,follow,max-image-preview:large" />
+        <link rel="canonical" href="@canonical" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="TippSend" />
+        <meta property="og:title" content="@searchTitle – TippSend" />
+        <meta property="og:description" content="@searchPage.Description" />
+        <meta property="og:url" content="@canonical" />
+        <meta property="og:locale" content="en_IE" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="@searchTitle – TippSend" />
+        <meta name="twitter:description" content="@searchPage.Description" />
+        <script type="application/ld+json">@Html.Raw(TippSendApp.Services.SearchMetadata.OrganizationJson())</script>
+    }
+    else
+    {
+        <meta name="robots" content="noindex,nofollow" />
+    }
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/brand.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pilot.css" asp-append-version="true" />
