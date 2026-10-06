@@ -37,8 +37,9 @@ public static class SearchMetadata
         ["name"] = "TippSend",
         ["url"] = Origin + "/",
         ["email"] = "contact@tippsend.ie",
+        ["telephone"] = "+353899707022",
         ["description"] = "Local collection and delivery for businesses and everyday items in South Tipperary, Ireland. Availability and the full price are agreed before a delivery is confirmed.",
         ["areaServed"] = new[] { "Clonmel", "Cahir", "Cashel", "Tipperary Town" },
-        ["contactPoint"] = new { @type = "ContactPoint", email = "contact@tippsend.ie", contactType = "customer support", availableLanguage = "English" }
+        ["contactPoint"] = new { @type = "ContactPoint", email = "contact@tippsend.ie", telephone = "+353899707022", contactType = "customer support", availableLanguage = "English" }
     });
 }

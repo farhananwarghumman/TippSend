@@ -2,7 +2,7 @@
 @model TippSendApp.Pages.Send.IndexModel
 @{ ViewData["Title"]="Send an item"; var received=Model.Received; }
 <main id="main-content" class="pilot-wrap" style="padding-top:48px;padding-bottom:64px">
-<div class="pilot-kicker">For businesses and personal deliveries</div><h1 style="font-size:44px;font-weight:650;letter-spacing:-.04em">Send an item.</h1><p class="pilot-lead">Arrange collection from a home or business and delivery to another address. Choose a shared run or ask for a separate trip. We confirm the details and price before you pay.</p>
+<div class="pilot-kicker">For businesses and personal deliveries</div><h1 style="font-size:44px;font-weight:650;letter-spacing:-.04em">Send an item.</h1><p class="pilot-lead">Arrange collection from a home or business and delivery to another address. Choose a shared run or ask for a separate trip. You can submit a request at any time. We confirm the details and price before you pay.</p>
 @if(received is not null) { <div class="pilot-success" role="status"><h2>Request received.</h2><p>Your reference is <strong>@received</strong>. Keep this reference when contacting contact@tippsend.ie.</p><p class="mb-0">This is a request, not a confirmed delivery. No payment has been taken. We will agree the price and availability before acceptance.</p></div> }
 else {
 <div class="pilot-grid pilot-book-grid" style="align-items:start;margin-top:32px">
