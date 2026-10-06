@@ -34,7 +34,7 @@ public class EmailService
     public async Task SendEnquiryAsync(string subject, string html)
     {
 
-        await SendAsync(to: _config["Notifications:OperatorEmail"] ?? "hello@tippsend.ie", subject: subject, html: html);
+        await SendAsync(to: _config["Notifications:OperatorEmail"] ?? "contact@tippsend.ie", subject: subject, html: html);
     }
 
     public async Task SendStatusUpdateAsync(Order order, string statusLine)
