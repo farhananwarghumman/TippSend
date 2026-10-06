@@ -99,6 +99,35 @@ if (builder.Configuration.GetValue<bool>("ReverseProxy:Enabled")) app.UseForward
 // The readiness probe returns no customer data and verifies database connectivity.
 app.MapGet("/health", async (ApplicationDbContext db) =>
     await db.Database.CanConnectAsync() ? Results.Ok(new { status = "ready" }) : Results.StatusCode(503));
+app.MapGet("/sitemap.xml", () => Results.Text(SearchMetadata.Sitemap(), "application/xml"));
+// Search crawlers, including OAI-SearchBot and Claude-SearchBot, use the wildcard
+// policy. robots.txt is discovery guidance, never an access-control mechanism.
+app.MapGet("/robots.txt", () => Results.Text("""
+    User-agent: *
+    Allow: /
+    Disallow: /Admin
+    Disallow: /admin
+    Disallow: /Operator
+    Disallow: /operator
+    Disallow: /Identity
+    Disallow: /identity
+    Disallow: /Track
+    Disallow: /track
+    Disallow: /Send/Request
+    Disallow: /send/request
+    Disallow: /Send/Return
+    Disallow: /send/return
+    Disallow: /Book
+    Disallow: /book
+    Disallow: /Setup
+    Disallow: /setup
+    Disallow: /uploads/
+    Disallow: /webhooks/
+    Disallow: /health
+    Disallow: /*?
+
+    Sitemap: https://www.tippsend.ie/sitemap.xml
+    """ + "\n", "text/plain"));
 
 // ── Pipeline ──────────────────────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
@@ -115,6 +144,8 @@ app.Use(async (context,next) => {
     context.Response.Headers["X-Content-Type-Options"]="nosniff";
     context.Response.Headers["Referrer-Policy"]="same-origin";
     var path=context.Request.Path.Value ?? "";
+    if (SearchMetadata.Find(path) is null || context.Request.QueryString.HasValue || context.Request.Method != "GET")
+        context.Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
     if(path.StartsWith("/Identity/Account/Register",StringComparison.OrdinalIgnoreCase)) { context.Response.StatusCode=404;return; }
     if(!builder.Configuration.GetValue<bool>("Features:LegacyGiftBooking") &&
        (path.StartsWith("/Book/Step",StringComparison.OrdinalIgnoreCase) ||
